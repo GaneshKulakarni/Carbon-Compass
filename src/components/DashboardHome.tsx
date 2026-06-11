@@ -11,10 +11,139 @@ interface DashboardHomeProps {
   onOpenMethodology: () => void;
 }
 
+const CLIMATE_NEWS = [
+  {
+    id: 1,
+    title: "Global Grid Achievement: Wind & Solar Power reaches 30%",
+    details: "Interactive public grid audits confirm sustainable cleaner-energy supplies cut global coal demand significantly.",
+    source: "IEA Energy Ledger"
+  },
+  {
+    id: 2,
+    title: "Historic Nature Restoration Law approved by European Council",
+    details: "New mandates require restoring 20% of degraded terrestrial and marine ecosystems to boost native soil carbon sinks.",
+    source: "Brussels Gazette"
+  },
+  {
+    id: 3,
+    title: "Eco Autonomous Seed Swarms successfully deployed",
+    details: "Drone reforestation fleets complete direct seeding of over 1.2M diverse trees in regions impacted by spring canopy fires.",
+    source: "Symbiotics Journal"
+  },
+  {
+    id: 4,
+    title: "Methane reduction bans extend to commercial sectors",
+    details: "A massive multi-city pact creates composting sorting mandates to prevent toxic landfill decay greenhouse emissions.",
+    source: "Solid Solid Solutions"
+  }
+];
+
+const DAILY_SHOCKS = [
+  {
+    title: "Flying from NYC to London generates over 980 kg CO₂e.",
+    desc: "That exceeds what citizens in 50 countries produce individually in a whole year. Virtual options save huge travel loads.",
+    badge: "✈️ Flight Emission"
+  },
+  {
+    title: "Beef yields up to 60 kg of heat-trapping gas per kg produced.",
+    desc: "Peas produce under 1 kg! Doing food swaps twice a week shrinks personal food footprint columns immediately.",
+    badge: "🥩 Diet Multiplier"
+  },
+  {
+    title: "Unmonitored Home AC drains up to 400 kg of coal-grid CO₂.",
+    desc: "Placing your thermostats 1°C higher or activating smart eco modes saves up to 15% in utility footprint parameters.",
+    badge: "⚡ Energy Peak"
+  },
+  {
+    title: "Food rotted inside landfills creates ultra concentrated methane.",
+    desc: "Methane holds 28x the heat-trapping power of CO₂. Compost scraps safely to bind soil nutrients naturally.",
+    badge: "♻️ Landfill rot"
+  },
+  {
+    title: "Fast fashion accounts for 10% of total international emissions.",
+    desc: "This exceeds all shipping and logistics flights combined! Consigning and thrifting garments saves up to 85% carbon waste.",
+    badge: "📦 Shopping Waste"
+  }
+];
+
 export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology }) => {
   const { 
     user, footprint, activityLogs, goals, recommendations, badges, deleteLog, setActiveTab, isDemoMode 
   } = useApp();
+
+  // News Carousel cycle states
+  const [newsIdx, setNewsIdx] = React.useState(0);
+  const [shockIndex, setShockIndex] = React.useState(0);
+
+  // Auto-cycle news every 15 seconds
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setNewsIdx(prev => (prev + 1) % CLIMATE_NEWS.length);
+    }, 15000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Compute consecutive days streaks dynamically
+  const streakInfo = React.useMemo(() => {
+    if (activityLogs.length === 0) return { current: 0, best: 0, warning: false };
+    
+    // YYYY-MM-DD unique log dates
+    const dates = Array.from(new Set(activityLogs.map(log => log.createdAt.split('T')[0]))) as string[];
+    dates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    
+    const todayStr = new Date().toISOString().split('T')[0];
+    const yesterdayStr = new Date(Date.now() - 24 * 3600 * 1000).toISOString().split('T')[0];
+    
+    let current = 0;
+    const hasLogToday = dates.includes(todayStr);
+    const hasLogYesterday = dates.includes(yesterdayStr);
+    
+    if (hasLogToday || hasLogYesterday) {
+      let checkDate = new Date();
+      if (!hasLogToday && hasLogYesterday) {
+        checkDate = new Date(Date.now() - 24 * 3600 * 1000);
+      }
+      
+      let checkStr = checkDate.toISOString().split('T')[0];
+      while (dates.includes(checkStr)) {
+        current++;
+        checkDate.setDate(checkDate.getDate() - 1);
+        checkStr = checkDate.toISOString().split('T')[0];
+      }
+    }
+    
+    // Best streak ever
+    let best = 0;
+    let temp = 0;
+    const sortedAsc = [...dates].sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    let lastTime: number | null = null;
+    
+    for (const dStr of sortedAsc) {
+      const curTime = new Date(dStr).getTime();
+      if (lastTime === null) {
+        temp = 1;
+      } else {
+        const diffDays = Math.round((curTime - lastTime) / (24 * 3600 * 1000));
+        if (diffDays === 1) {
+          temp++;
+        } else if (diffDays > 1) {
+          temp = 1;
+        }
+      }
+      if (temp > best) {
+        best = temp;
+      }
+      lastTime = curTime;
+    }
+    
+    if (current > best) {
+      best = current;
+    }
+    
+    // Warn if active streak is threatened (logged yesterday but not today)
+    const warning = hasLogYesterday && !hasLogToday;
+    return { current, best, warning };
+  }, [activityLogs]);
 
   // Pre-calculations
   const baselineMonthly = footprint?.monthlyEstimate || 1200;
@@ -66,7 +195,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 mt-2 animate-fade-in" id="dashboard-home-view">
       
       {/* Top Banner Greeting */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <span className="text-[11px] font-bold font-mono text-forest-700 bg-forest-100 dark:bg-forest-950/40 dark:text-forest-400 px-2.5 py-1 rounded">
             {user?.climatePersona || 'Everyday Reducer'}
@@ -91,6 +220,39 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
             <span>Log Daily Carbon Save</span>
           </button>
         </div>
+      </div>
+
+      {/* Climate News Banner (Periodically Refreshable) */}
+      <div className="mb-8 rounded-2xl border border-emerald-200/50 bg-emerald-50/30 p-4 shadow-sm dark:border-emerald-900/20 dark:bg-emerald-950/20 flex flex-col sm:flex-row justify-between items-center gap-3 relative overflow-hidden" id="climate-news-banner">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950/45 dark:text-emerald-400 text-lg">
+            📰
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] font-bold font-mono text-emerald-700 dark:text-emerald-400 uppercase tracking-widest bg-emerald-100/50 dark:bg-emerald-950 px-1.5 py-0.2 rounded">
+                Climate Update
+              </span>
+              <span className="text-[10px] text-stone-400 font-mono">Source: {CLIMATE_NEWS[newsIdx].source}</span>
+            </div>
+            <h4 className="font-bold text-xs text-stone-900 dark:text-stone-50 mt-1 leading-snug">
+              {CLIMATE_NEWS[newsIdx].title}
+            </h4>
+            <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-snug mt-0.5">
+              {CLIMATE_NEWS[newsIdx].details}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setNewsIdx(prev => (prev + 1) % CLIMATE_NEWS.length)}
+          className="shrink-0 inline-flex items-center space-x-1 rounded-xl bg-white hover:bg-stone-50 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-200/60 dark:border-stone-800/80 px-3 py-2 text-[10px] font-bold text-stone-700 dark:text-stone-300 shadow-xs"
+          title="Cycle environmental news"
+          id="btn-news-cycle"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          <span>Next Briefing</span>
+        </button>
       </div>
 
       {/* Main Stats Grid - carbon budget pairing with 3D Hologram Globe */}
@@ -182,27 +344,74 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
       {/* Habit Momentum and Achievements row */}
       <div className="grid gap-6 md:grid-cols-2 mb-8">
         
-        {/* Milestone Streak Widget */}
-        <div className="rounded-2xl border border-stone-200/60 bg-white p-5 shadow-xs dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between">
+        {/* Dynamic Streak Snapshot Card */}
+        <div className="rounded-2xl border border-stone-200/60 bg-white p-5 shadow-xs dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between" id="streak-snapshot-widget">
           <div>
-            <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono">Habit Momentum</span>
-            <div className="flex items-center gap-3.5 mt-3.5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 text-2xl font-bold font-mono shadow-xs animate-bounce-slow">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono">Streak Snapshot</span>
+              {streakInfo.warning ? (
+                <span className="text-[9px] uppercase font-mono text-amber-500 bg-amber-500/5 px-2 py-0.5 rounded font-bold border border-amber-500/10 animate-pulse">At Risk</span>
+              ) : (
+                <span className="text-[9px] uppercase font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-bold dark:bg-emerald-950/20 dark:text-emerald-400">Streak Active</span>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-3.5 mt-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 text-2xl font-bold font-mono shadow-xs animate-bounce-slow shrink-0">
                 🔥
               </div>
               <div>
-                <div className="text-xl font-display font-bold text-stone-900 dark:text-stone-50">
-                  {activityLogs.length > 0 ? '5-Day Streak' : '0-Day Streak'}
+                <div className="text-2xl font-display font-extrabold text-stone-900 dark:text-stone-50 leading-tight">
+                  {streakInfo.current}-Day Streak
                 </div>
-                <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">Consecutive logged days</p>
+                <p className="text-[11px] text-stone-400 dark:text-stone-500 font-medium">
+                  Best Record: {streakInfo.best} consecutive days
+                </p>
               </div>
             </div>
-          </div>
-          <div className="border-t border-stone-100 dark:border-stone-800 pt-3.5 mt-4 flex justify-between items-center text-[11px]">
-            <span className="text-stone-500 font-medium">Daily Goals Active:</span>
-            <span className="font-bold text-stone-900 dark:text-stone-300">
-              {goals.filter(g => g.status === 'active').length} on track
-            </span>
+
+            {/* Streak Risk Alert or Motivational Line */}
+            <div className="mt-4 pt-3.5 border-t border-stone-100 dark:border-stone-800">
+              {streakInfo.warning ? (
+                <div className="p-2.5 rounded-lg bg-rose-500/5 border border-rose-500/15 text-[11px] text-rose-600 dark:text-rose-450 flex items-start gap-1.5 leading-relaxed">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                  <span>Your active streak expires tonight! Log an action now to protect your progress.</span>
+                </div>
+              ) : streakInfo.current > 0 ? (
+                <div className="text-[11.5px] text-stone-500 dark:text-stone-400 flex items-center gap-1.5 font-sans">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                  <span>Next milestone: achieve <strong>{(Math.floor(streakInfo.current / 7) + 1) * 7}-Day Badge</strong> ({7 - (streakInfo.current % 7)} days away)</span>
+                </div>
+              ) : (
+                <div className="text-[11.5px] text-stone-550 dark:text-stone-400 flex items-center gap-1.5 font-sans">
+                  <Flame className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                  <span>No consecutive log record found. Save your first carbon preset to ignite your streak!</span>
+                </div>
+              )}
+            </div>
+
+            {/* Past 7 Days Consistency Heatmap */}
+            <div className="mt-4 pt-3.5 border-t border-stone-100 dark:border-stone-800">
+              <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider font-mono block mb-2">Past 7 Days Consistency</span>
+              <div className="flex justify-between gap-1.5">
+                {[6, 5, 4, 3, 2, 1, 0].map(daysAgo => {
+                  const checkDateStr = new Date(Date.now() - daysAgo * 24 * 3600 * 1000).toISOString().split('T')[0];
+                  const dayName = new Date(Date.now() - daysAgo * 24 * 3600 * 1000).toLocaleDateString('en-US', { weekday: 'narrow' });
+                  const isToday = daysAgo === 0;
+                  const loggedOnDay = (Array.from(new Set(activityLogs.map(log => log.createdAt.split('T')[0]))) as string[]).includes(checkDateStr);
+                  
+                  return (
+                    <div key={daysAgo} className="flex flex-col items-center">
+                      <div className={`h-6.5 w-6.5 rounded-lg flex items-center justify-center text-[10px] font-bold ${loggedOnDay ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-500/10' : isToday ? 'border border-dashed border-amber-400 bg-amber-500/5 text-amber-600' : 'bg-stone-50 text-stone-300 dark:bg-stone-950 dark:text-stone-700 border border-stone-100 dark:border-stone-850'}`}>
+                        {loggedOnDay ? '✓' : '•'}
+                      </div>
+                      <span className="text-[9px] text-stone-400 font-mono mt-1 capitalize">{dayName}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -227,6 +436,91 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
             <span className="font-bold text-indigo-600 dark:text-indigo-400">
               {badges.filter(b => b.earnedAt).reverse()[0]?.title || 'Awaiting First log'}
             </span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Compare Me to the World & Daily Shock Fact Row */}
+      <div className="grid gap-6 md:grid-cols-3 mb-8">
+        
+        {/* Compare Me to the World Card - takes 2 cols */}
+        <div className="md:col-span-2 rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between" id="compare-world-card">
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono">Compare Me To The World</span>
+              <span className="text-[10px] uppercase font-mono bg-forest-100 text-forest-700 dark:bg-forest-950 dark:text-forest-400 px-2 py-0.5 rounded font-bold">Monthly Score Comparison</span>
+            </div>
+            <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed mb-5">
+              Visualize your monthly carbon footprint against standard local averages and the critical sustainable goal target.
+            </p>
+
+            <div className="space-y-4">
+              {[
+                { label: 'My Current Footprint', val: currentActual, color: 'bg-forest-600', isUser: true },
+                { label: `${user?.region || 'US'} National Avg`, val: user?.region === 'US' ? 1333 : (user?.region === 'EU' ? 533 : 391), color: 'bg-stone-400' },
+                { label: 'Global Average footprint', val: 391, color: 'bg-stone-500' },
+                { label: 'Sustainable Target Limit', val: 166, color: 'bg-emerald-500', isTarget: true }
+              ].map((item, i) => {
+                const maxVal = 1333;
+                const percent = Math.min(100, Math.round((item.val / maxVal) * 100));
+                return (
+                  <div key={i} className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className={`font-semibold ${item.isUser ? 'text-forest-700 dark:text-forest-405 font-bold' : item.isTarget ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-605 dark:text-stone-300'}`}>
+                        {item.label}
+                      </span>
+                      <span className="font-mono font-bold text-stone-700 dark:text-stone-300">{item.val} kg CO₂e</span>
+                    </div>
+                    <div className="h-2.5 w-full bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden relative">
+                      <div 
+                        className={`h-full ${item.color} rounded-full transition-all duration-500`}
+                        style={{ width: `${percent}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-stone-100 dark:border-stone-850 text-[10.5px] text-stone-500 dark:text-stone-400 italic">
+            {currentActual <= 166 
+              ? "🎉 Exceptional performance! You are currently operating within the sustainable 1.5°C climate limit."
+              : currentActual <= (user?.region === 'US' ? 1333 : (user?.region === 'EU' ? 533 : 391))
+              ? "Good progress! You are living below your regional baseline. Try matching the Sustainable Target."
+              : "Warning: Your current monthly operations are exceeding regional baseline values. Tap dynamic presets to save carbon!"
+            }
+          </div>
+        </div>
+
+        {/* Daily Shock Card - takes 1 col */}
+        <div className="rounded-2xl border border-amber-200/50 bg-amber-50/20 p-6 shadow-md dark:border-stone-800 dark:bg-stone-900/40 flex flex-col justify-between" id="daily-shock-card">
+          <div>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider font-mono">Daily Shock Fact</span>
+              <button 
+                onClick={() => setShockIndex(prev => (prev + 1) % DAILY_SHOCKS.length)}
+                className="p-1 rounded hover:bg-amber-100/40 text-stone-405"
+                title="Next shock fact"
+              >
+                <RefreshCw className="h-3.5 w-3.5 pb-0.5" />
+              </button>
+            </div>
+            
+            <div className="mt-3.5">
+              <span className="text-[9px] font-bold font-mono tracking-wider text-amber-800 dark:text-amber-305 bg-amber-100/50 dark:bg-amber-950/40 px-2 py-0.5 rounded uppercase">
+                {DAILY_SHOCKS[shockIndex].badge}
+              </span>
+              <h4 className="font-display font-extrabold text-sm text-stone-900 dark:text-stone-50 mt-2.5 leading-snug">
+                {DAILY_SHOCKS[shockIndex].title}
+              </h4>
+              <p className="text-xs text-stone-500 dark:text-stone-300 leading-relaxed mt-2.5">
+                {DAILY_SHOCKS[shockIndex].desc}
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-amber-100/45 text-[10px] text-stone-400 font-mono tracking-wide">
+            Fact #{shockIndex + 1} of {DAILY_SHOCKS.length} • Tap refresh button to cycle
           </div>
         </div>
 

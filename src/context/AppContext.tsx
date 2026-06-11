@@ -12,6 +12,7 @@ interface AppContextProps {
   activeTab: string;
   isDemoMode: boolean;
   theme: 'light' | 'dark';
+  completedLessons: string[];
   setTheme: (theme: 'light' | 'dark') => void;
   setActiveTab: (tab: string) => void;
   completeOnboarding: (profile: UserProfile) => void;
@@ -20,6 +21,7 @@ interface AppContextProps {
   addGoalFromRecommendation: (recId: string) => void;
   toggleGoalStatus: (goalId: string) => void;
   logGoalProgress: (goalId: string) => void;
+  completeLesson: (lessonId: string) => void;
   resetAllData: () => void;
   loadDemoMode: () => void;
   setGoals: React.Dispatch<React.SetStateAction<Goal[]>>;
@@ -143,7 +145,8 @@ const INITIAL_BADGES: MilestoneBadge[] = [
   { id: 'b_eater', title: 'Conscious Eater', description: 'Log 5 plant-based or low-beef meals.', category: 'food', icon: '🌱' },
   { id: 'b_energy', title: 'Grid Champion', description: 'Perform 4 energy saving actions.', category: 'home', icon: '⚡' },
   { id: 'b_waste', title: 'Zero Waste Monk', description: 'Compost or recycle 10 times.', category: 'waste', icon: '♻️' },
-  { id: 'b_saving_50', title: 'Planet Protector', description: 'Reduce over 50 kg of estimated carbon!', category: 'general', icon: '🌍' }
+  { id: 'b_saving_50', title: 'Planet Protector', description: 'Reduce over 50 kg of estimated carbon!', category: 'general', icon: '🌍' },
+  { id: 'b_truth_seeker', title: 'Truth Seeker', description: 'Debunk 3 myths or complete lessons in the Learn Hub.', category: 'general', icon: '🧠' }
 ];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -156,6 +159,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeTab, setActiveTab] = useState<string>('landing');
   const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
   // Load from local storage on mount
   useEffect(() => {
@@ -166,9 +170,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const savedRecs = localStorage.getItem('cc_recs');
     const savedBadges = localStorage.getItem('cc_badges');
     const savedTheme = localStorage.getItem('cc_theme');
+    const savedLessons = localStorage.getItem('cc_lessons');
 
     if (savedTheme) {
       setTheme(savedTheme as 'light' | 'dark');
+    }
+
+    if (savedLessons) {
+      try {
+        setCompletedLessons(JSON.parse(savedLessons));
+      } catch (e) {
+        setCompletedLessons([]);
+      }
     }
 
     if (savedUser && savedFootprint) {
@@ -191,7 +204,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('cc_recs', JSON.stringify(recommendations));
     localStorage.setItem('cc_badges', JSON.stringify(badges));
     localStorage.setItem('cc_theme', theme);
-  }, [user, footprint, activityLogs, goals, recommendations, badges, theme]);
+    localStorage.setItem('cc_lessons', JSON.stringify(completedLessons));
+  }, [user, footprint, activityLogs, goals, recommendations, badges, theme, completedLessons]);
+
+  const completeLesson = (lessonId: string) => {
+    setCompletedLessons(prev => {
+      if (prev.includes(lessonId)) return prev;
+      const updated = [...prev, lessonId];
+      
+      // Earn Badge trigger for completing lessons / myths
+      if (updated.length >= 3) {
+        setBadges(badgesData => {
+          const finishedIdx = badgesData.findIndex(b => b.id === 'b_truth_seeker');
+          if (finishedIdx !== -1 && !badgesData[finishedIdx].earnedAt) {
+            const updatedBadges = [...badgesData];
+            updatedBadges[finishedIdx] = { ...updatedBadges[finishedIdx], earnedAt: new Date().toISOString() };
+            return updatedBadges;
+          }
+          return badgesData;
+        });
+      }
+      return updated;
+    });
+  };
 
   // Handle onboarding completion
   const completeOnboarding = (profile: UserProfile) => {
@@ -622,6 +657,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       activeTab,
       isDemoMode,
       theme,
+      completedLessons,
       setTheme,
       setActiveTab,
       completeOnboarding,
@@ -630,6 +666,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addGoalFromRecommendation,
       toggleGoalStatus,
       logGoalProgress,
+      completeLesson,
       resetAllData,
       loadDemoMode,
       setGoals

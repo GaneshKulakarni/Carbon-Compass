@@ -89,7 +89,7 @@ export const SettingsView: React.FC = () => {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50/50 px-3 py-2 text-xs focus:outline-hidden dark:bg-stone-950 dark:border-stone-800"
+                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:outline-hidden text-stone-900 dark:bg-stone-950 dark:border-stone-800 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 />
               </div>
 
@@ -99,7 +99,7 @@ export const SettingsView: React.FC = () => {
                   id="settings-region-select"
                   value={region}
                   onChange={(e) => setRegion(e.target.value)}
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:outline-hidden dark:bg-stone-950 dark:border-stone-800"
+                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:outline-hidden text-stone-900 dark:bg-stone-950 dark:border-stone-800 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 >
                   <option value="US">United States (High Average)</option>
                   <option value="EU">European Union (Moderate average)</option>
@@ -116,7 +116,7 @@ export const SettingsView: React.FC = () => {
                   id="settings-household-select"
                   value={householdSize}
                   onChange={(e) => setHouseholdSize(Number(e.target.value))}
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:outline-hidden dark:bg-stone-950 dark:border-stone-800"
+                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:outline-hidden text-stone-900 dark:bg-stone-950 dark:border-stone-800 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 >
                   <option value={1}>1 person (Single)</option>
                   <option value={2}>2 people</option>
@@ -131,7 +131,7 @@ export const SettingsView: React.FC = () => {
                   id="settings-food-select"
                   value={food}
                   onChange={(e) => setFood(e.target.value as any)}
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:outline-hidden dark:bg-stone-950 dark:border-stone-800"
+                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:outline-hidden text-stone-900 dark:bg-stone-950 dark:border-stone-800 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 >
                   <option value="meat_heavy">Meat Heavy (Beef frequently)</option>
                   <option value="mixed">Mixed standard (Pork/poultry)</option>
@@ -147,7 +147,7 @@ export const SettingsView: React.FC = () => {
                   id="settings-energy-select"
                   value={energy}
                   onChange={(e) => setEnergy(e.target.value as any)}
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:outline-hidden dark:bg-stone-950 dark:border-stone-800"
+                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:outline-hidden text-stone-900 dark:bg-stone-950 dark:border-stone-800 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 >
                   <option value="coal_gas">Coal & Fossil intensive</option>
                   <option value="grid_avg">Average Public grid loop</option>
@@ -161,7 +161,7 @@ export const SettingsView: React.FC = () => {
                   id="settings-transport-select"
                   value={transport}
                   onChange={(e) => setTransport(e.target.value as any)}
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:outline-hidden dark:bg-stone-950 dark:border-stone-800"
+                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:outline-hidden text-stone-900 dark:bg-stone-950 dark:border-stone-800 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 >
                   <option value="car_daily">Single passenger car (Daily)</option>
                   <option value="car_occasional">Car (occasional usage)</option>

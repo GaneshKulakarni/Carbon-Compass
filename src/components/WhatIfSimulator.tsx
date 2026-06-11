@@ -133,14 +133,54 @@ export const WhatIfSimulator: React.FC = () => {
         </div>
       </div>
 
+      {/* Social Damage Cost of Carbon Simulator */}
+      <div className="rounded-2xl border border-rose-200/60 bg-rose-500/5 p-6 mb-8 dark:border-stone-850 dark:bg-stone-900/20" id="social-damage-simulator">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="space-y-1">
+            <span className="text-xs font-bold text-rose-500 uppercase tracking-wider font-mono">Social Cost of Carbon (SCC) Simulator</span>
+            <h3 className="text-base font-display font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5 pt-1">
+              <span>Dynamic Climate Damage Index</span>
+            </h3>
+            <p className="text-xs text-stone-505 dark:text-stone-355 leading-relaxed font-sans pr-4">
+              According to current climate-economics guidelines (e.g. EPA targets), each <strong>1 kg of CO₂e</strong> released causes approximately <strong>$0.19 USD</strong> of global ecological damage (representing food system crop failures, severe flooding, storm cleanups, and public health costs).
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-6 shrink-0 bg-white/50 dark:bg-stone-900/80 p-4 rounded-xl border border-rose-100 dark:border-stone-800 text-center">
+            <div>
+              <span className="text-[9px] text-stone-400 font-mono block uppercase">Baseline Damage</span>
+              <span className="text-sm font-extrabold text-stone-700 dark:text-stone-300 font-mono">${(baselineMonthly * 0.19).toFixed(2)}</span>
+              <span className="text-[9px] text-stone-400 block font-mono">/ month</span>
+            </div>
+            <div>
+              <span className="text-[9px] text-rose-450 font-mono block uppercase">Strategy Damage</span>
+              <span className="text-sm font-extrabold text-rose-600 dark:text-rose-400 font-mono">${(projectedFootprint * 0.19).toFixed(2)}</span>
+              <span className="text-[9px] text-stone-400 block font-mono">/ month</span>
+            </div>
+            <div>
+              <span className="text-[9px] text-emerald-600 font-mono block uppercase">Damage Avoided</span>
+              <span className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">${(totalSavingsProjected * 0.19).toFixed(2)}</span>
+              <span className="text-[9.5px] uppercase font-mono text-emerald-600 font-bold block">✓ Bypassed</span>
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 pt-3 border-t border-rose-200/30 text-[10.5px] text-stone-500 dark:text-stone-400 italic">
+          {totalSavingsProjected > 150 
+            ? `🎉 Incredible strategy! Over 1 year, your selected micro-habits prevent $ ${(totalSavingsProjected * 0.19 * 12).toFixed(2)} USD in planetary climate damages.`
+            : "No major damage savings logged yet. Try adjusting any commuter or dietary vegan sliders below to reduce your planet tax."
+          }
+        </div>
+      </div>
+
       {/* Main split: sliders workspace vs Action Matrices */}
       <div className="grid gap-8 lg:grid-cols-2">
         
-        {/* Sliders workspace */}
-        <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900 space-y-6">
-          <h3 className="font-display font-bold text-stone-900 dark:text-stone-50 text-base mb-1">
-            Adjust Footprint Habits
-          </h3>
+        {/* Sliders workspace stacking column */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900 space-y-6">
+            <h3 className="font-display font-bold text-stone-900 dark:text-stone-50 text-base mb-1">
+              Adjust Footprint Habits
+            </h3>
           <p className="text-xs text-stone-400 leading-relaxed mb-4">
             Fine-tune daily habits below and observe the cumulative impact. Check monetary pricing reductions simulated live!
           </p>
@@ -255,6 +295,87 @@ export const WhatIfSimulator: React.FC = () => {
 
           </div>
         </div>
+
+        {/* Enhanced Future Impact View Card */}
+        <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900" id="future-impact-trajectories">
+          <span className="text-xs font-bold text-indigo-505 dark:text-indigo-400 uppercase tracking-wider font-mono">Simulated Long-term Outlook</span>
+          <h3 className="font-display font-bold text-stone-900 dark:text-stone-105 text-base mb-1.5 mt-1 flex items-center gap-1">
+            <span>10-Year Decarbonization Outlook</span>
+          </h3>
+          <p className="text-xs text-stone-400 leading-relaxed mb-4 font-sans">
+            Visualizing the generational consequences of maintaining your fine-tuned adjustments compared against typical Business-As-Usual (BAU) carbon emission curves.
+          </p>
+
+          <div className="space-y-4">
+            
+            {/* Timeline chart/rows */}
+            <div className="bg-stone-50 dark:bg-stone-950/40 rounded-xl p-4 border border-stone-150 dark:border-stone-850 grid gap-4 divide-y divide-stone-200/40 dark:divide-stone-800/60">
+              
+              {/* 1 Year Row */}
+              <div className="flex justify-between items-center pt-2 first:pt-0">
+                <div>
+                  <span className="text-xs font-bold text-stone-700 dark:text-stone-300">1-Year Cumulative Footprint</span>
+                  <span className="text-[10px] text-stone-400 block font-sans">Carbon released over 12 months</span>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-xs font-semibold text-stone-403 line-through block font-mono">{(baselineMonthly * 12).toLocaleString()} kg</span>
+                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">{(projectedFootprint * 12).toLocaleString()} kg</span>
+                </div>
+              </div>
+
+              {/* 5 Year Row */}
+              <div className="flex justify-between items-center pt-3">
+                <div>
+                  <span className="text-xs font-bold text-stone-700 dark:text-stone-300">5-Year Cumulative Footprint</span>
+                  <span className="text-[10px] text-stone-400 block font-sans">Accumulated strategy weight</span>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-xs font-semibold text-stone-403 line-through block font-mono">{(baselineMonthly * 12 * 5).toLocaleString()} kg</span>
+                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">{(projectedFootprint * 12 * 5).toLocaleString()} kg</span>
+                </div>
+              </div>
+
+              {/* 10 Year Row */}
+              <div className="flex justify-between items-center pt-3">
+                <div>
+                  <span className="text-xs font-bold text-stone-700 dark:text-stone-300">10-Year Cumulative Footprint</span>
+                  <span className="text-[10px] text-stone-400 block font-sans">Decade of active carbon savings</span>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-xs font-semibold text-stone-403 line-through block font-mono">{(baselineMonthly * 12 * 10).toLocaleString()} kg</span>
+                  <span className="text-sm font-black text-teal-650 dark:text-teal-400 font-mono">{(projectedFootprint * 12 * 10).toLocaleString()} kg</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Advanced Climate Indicators */}
+            <div className="grid grid-cols-2 gap-4">
+              
+              {/* Mature trees forest required to offset */}
+              <div className="bg-emerald-500/5 p-3 rounded-xl border border-emerald-555/10 text-center">
+                <span className="text-[9px] text-stone-405 font-mono block uppercase">Trees Required (10 Yr)</span>
+                <span className="text-base font-black text-emerald-600 dark:text-emerald-400 font-mono leading-none block my-1">
+                  {Math.round((projectedFootprint * 12 * 10) / 21)}
+                </span>
+                <span className="text-[8.5px] text-stone-400 block font-sans">down from {Math.round((baselineMonthly * 12 * 10) / 21)}</span>
+              </div>
+
+              {/* Arctic ice sheet conserved */}
+              <div className="bg-sky-500/5 p-3 rounded-xl border border-sky-555/10 text-center">
+                <span className="text-[9px] text-stone-405 font-mono block uppercase">Polar Sea Ice Saved</span>
+                <span className="text-base font-black text-sky-600 dark:text-sky-400 font-mono leading-none block my-1 animate-pulse">
+                  {Number(((totalSavingsProjected * 12 * 10) / 1000 * 3).toFixed(1))} m²
+                </span>
+                <span className="text-[8.5px] text-stone-400 block font-sans">equivalent sea ice</span>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
 
         {/* Action Matrices and Recommendation Cards quadrant */}
         <div className="space-y-6">

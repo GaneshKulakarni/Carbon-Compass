@@ -6,6 +6,15 @@ import { ClipboardList, Plus, Compass, Sparkles, Check, CheckCircle2, TrendingDo
 export const QuickTracker: React.FC = () => {
   const { logActivity, activityLogs, deleteLog } = useApp();
 
+  // Daily checked habits local tracking state
+  const [checkedHabits, setCheckedHabits] = useState<Record<string, boolean>>(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const saved = localStorage.getItem(`cc_daily_habits_${todayStr}`);
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [shareCopied, setShareCopied] = useState(false);
+
   // Manual logging form state
   const [category, setCategory] = useState<'transport' | 'food' | 'home' | 'shopping' | 'waste'>('transport');
   const [actionType, setActionType] = useState<string>('cycled');
@@ -30,7 +39,7 @@ export const QuickTracker: React.FC = () => {
       id: "preset_vegan_burger",
       label: "Plant-Based Breakfast/Lunch",
       desc: "Vegan burger / veggie salad swap",
-      category: "food" as const,
+      category: "food text-xs" as const,
       action: "vegan_meal",
       val: 1,
       unit: "meal",
@@ -72,6 +81,43 @@ export const QuickTracker: React.FC = () => {
     }
   ];
 
+  // Daily checklist toggler action
+  const handleToggleHabitCheck = (preset: typeof presets[0]) => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isCurrentlyChecked = !!checkedHabits[preset.id];
+
+    // Toggle
+    const nextCheckState = { ...checkedHabits, [preset.id]: !isCurrentlyChecked };
+    setCheckedHabits(nextCheckState);
+    localStorage.setItem(`cc_daily_habits_${todayStr}`, JSON.stringify(nextCheckState));
+
+    if (!isCurrentlyChecked) {
+      logActivity(
+        preset.category,
+        preset.action,
+        preset.val,
+        preset.unit,
+        `Daily Habit check-in: "${preset.label}"`,
+        preset.displayFactor
+      );
+
+      const saveKgs = Math.abs(preset.displayFactor);
+      let feedback = "";
+      if (saveKgs >= 5) {
+        feedback = `🌟 Incredible milestone! Activating "${preset.label}" saved ${saveKgs} kg CO₂e. That avoids equivalent greenhouse impact to 24 hours of coal-grid power!`;
+      } else if (saveKgs >= 2) {
+        feedback = `🌿 Marvelous! Activating "${preset.label}" avoided ${saveKgs} kg CO₂e. Every consistent routine shrinks our warming trend.`;
+      } else {
+        feedback = `🌱 Great habit loop! Swan to "${preset.label}" avoided ${saveKgs} kg. Constant micro-habits yield macro impacts!`;
+      }
+      setSuccessMsg(feedback);
+      setTimeout(() => setSuccessMsg(''), 5500);
+    } else {
+      setSuccessMsg(`Turned off: un-checked the daily routine card "${preset.label}".`);
+      setTimeout(() => setSuccessMsg(''), 2500);
+    }
+  };
+
   // Helper trigger for presets
   const handlePresetTrigger = (preset: typeof presets[0]) => {
     logActivity(
@@ -82,8 +128,18 @@ export const QuickTracker: React.FC = () => {
       preset.logLabel,
       preset.displayFactor
     );
-    setSuccessMsg(`Success: logged "${preset.label}"! Saved ${Math.abs(preset.displayFactor)} kg CO₂e.`);
-    setTimeout(() => setSuccessMsg(''), 3500);
+
+    const saveKgs = Math.abs(preset.displayFactor);
+    let feedback = "";
+    if (saveKgs >= 5) {
+      feedback = `🌟 Premium Action! Logged "${preset.label}" saved ${saveKgs} kg CO₂e! This equals keeping a refrigerator powered off for a month!`;
+    } else if (saveKgs >= 2) {
+      feedback = `🌿 Eco Champion! You bypassed ${saveKgs} kg CO₂e greenhouse gas. High-five!`;
+    } else {
+      feedback = `🌱 Positive check! Swapped to "${preset.label}" saved ${saveKgs} kg CO₂e. Keep building momentum!`;
+    }
+    setSuccessMsg(feedback);
+    setTimeout(() => setSuccessMsg(''), 5000);
   };
 
   // Get dynamic unit based on category/action selection
@@ -125,9 +181,23 @@ export const QuickTracker: React.FC = () => {
       finalFactor
     );
 
-    setSuccessMsg(`Successfully saved manually logged entry! Impact: ${finalFactor < 0 ? '-' : '+'}${Math.abs(Number(finalFactor.toFixed(1)))} kg CO₂e.`);
+    const saveKgs = Math.abs(finalFactor);
+    let feedback = "";
+    if (finalFactor < 0) {
+      if (saveKgs >= 5) {
+        feedback = `🌟 High-Lever Save! Logging "${finalLabel}" bypassed ${saveKgs.toFixed(1)} kg CO₂e. Incredible sustainability stewardship!`;
+      } else if (saveKgs >= 2) {
+        feedback = `🌿 Active Offset! Logging "${finalLabel}" successfully avoided ${saveKgs.toFixed(1)} kg CO₂e. Premium choice!`;
+      } else {
+        feedback = `🌱 Positive wave! Bypassed ${saveKgs.toFixed(1)} kg CO₂e with this habit. Micro-actions compound to macro solutions!`;
+      }
+    } else {
+      feedback = `Logged: recorded "${finalLabel}" (+${saveKgs.toFixed(1)} kg CO₂e additive footprint). Try balancing this with commuter or plant-based dining presets.`;
+    }
+
+    setSuccessMsg(feedback);
     setLabel('');
-    setTimeout(() => setSuccessMsg(''), 4000);
+    setTimeout(() => setSuccessMsg(''), 5500);
   };
 
   const { unit, factor } = getUnitAndFactor();
@@ -193,6 +263,100 @@ export const QuickTracker: React.FC = () => {
               ))}
             </div>
           </div>
+
+          {/* Enhanced Habit Section */}
+          <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900" id="daily-checklist-card">
+            <h3 className="font-display font-bold text-stone-900 dark:text-stone-50 text-base mb-1.5 flex items-center gap-1.5">
+              <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600" />
+              <span>My Daily Habit Checklist</span>
+            </h3>
+            <p className="text-xs text-stone-450 dark:text-stone-400 mb-4 leading-relaxed">
+              Check off recurring sustainable micro-actions you completed today. Checking logs their relative carbon savings score automatically!
+            </p>
+
+            <div className="space-y-3">
+              {presets.map((preset) => {
+                const isChecked = !!checkedHabits[preset.id];
+                return (
+                  <div 
+                    key={`chk-${preset.id}`}
+                    className={`flex items-center justify-between p-3 rounded-xl border transition-all ${isChecked ? 'bg-emerald-500/5 border-emerald-300 dark:border-emerald-900/40' : 'bg-stone-50/40 border-stone-150/80 dark:border-stone-850'}`}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <button
+                        onClick={() => handleToggleHabitCheck(preset)}
+                        className={`h-5 w-5 rounded-md flex items-center justify-center shrink-0 border mt-0.5 cursor-pointer select-none transition-colors ${isChecked ? 'bg-emerald-500 text-white border-emerald-500' : 'border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-950'}`}
+                        id={`chk-box-${preset.id}`}
+                      >
+                        {isChecked && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                      </button>
+                      <div>
+                        <h6 className={`text-xs font-bold ${isChecked ? 'text-emerald-800 dark:text-emerald-400' : 'text-stone-800 dark:text-stone-150'}`}>
+                          {preset.label}
+                        </h6>
+                        <p className="text-[10px] text-stone-400 leading-none mt-0.5 font-sans">{preset.desc}</p>
+                      </div>
+                    </div>
+                    <span className="text-[10.5px] font-mono text-stone-500 dark:text-stone-400 font-bold shrink-0 ml-1">
+                      {Math.abs(preset.displayFactor)} kg
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Social Impact Share Card */}
+          <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900" id="impact-share-card">
+            <h3 className="font-display font-bold text-stone-900 dark:text-stone-50 text-base mb-1.5 flex items-center gap-1.5">
+              <Compass className="h-4.5 w-4.5 text-indigo-650 dark:text-indigo-400" />
+              <span>My Shareable Impact Summary</span>
+            </h3>
+            <p className="text-xs text-stone-450 dark:text-stone-400 mb-4 leading-relaxed">
+              Generate high-visibility social network snippets highlighting your total verified carbon saves on Carbon Compass.
+            </p>
+
+            {/* Share Card mockup */}
+            <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50/50 to-indigo-50/45 dark:from-stone-950 dark:to-stone-900/60 border border-stone-150 dark:border-stone-850 relative overflow-hidden">
+              <div className="relative z-10 space-y-3.5">
+                <div className="flex justify-between items-center text-[10px] font-mono font-bold text-stone-400 tracking-wider">
+                  <span>CARBON COMPASS PROFILE</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">VERIFIED OFFSET</span>
+                </div>
+
+                <div>
+                  <h4 className="text-2xl font-display font-black text-stone-900 dark:text-stone-50 leading-none">
+                    {Math.round(activityLogs.filter(l => l.estimatedEmission < 0).reduce((acc, l) => acc + Math.abs(l.estimatedEmission), 0))} kg Saved!
+                  </h4>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1.5 leading-relaxed font-sans">
+                    "I avoided {Math.round(activityLogs.filter(l => l.estimatedEmission < 0).reduce((acc, l) => acc + Math.abs(l.estimatedEmission), 0))} kg of CO₂ carbon emissions today with @CarbonCompass! Join me in tracking and reducing your environmental impact!"
+                  </p>
+                </div>
+
+                <div className="flex justify-between items-center pt-2 border-t border-stone-200/50 dark:border-stone-800/80 text-[10px] text-stone-450 font-mono">
+                  <span>🔥 Streak Record Active</span>
+                  <span className="text-indigo-600 font-bold dark:text-indigo-400">#ClimateHackathon</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <button
+                onClick={() => {
+                  const totalSavedKgs = Math.round(activityLogs.filter(l => l.estimatedEmission < 0).reduce((acc, l) => acc + Math.abs(l.estimatedEmission), 0));
+                  const copyText = `I avoided ${totalSavedKgs} kg of CO₂ emissions with @CarbonCompass! Join me in tracking and carbon-saving!`;
+                  navigator.clipboard.writeText(copyText);
+                  setShareCopied(true);
+                  setTimeout(() => setShareCopied(false), 3000);
+                }}
+                className="w-full text-center text-xs font-bold bg-forest-600 hover:bg-forest-700 text-white py-2.5 rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
+                id="btn-copy-share-snippet"
+              >
+                <span>{shareCopied ? "📋 Shared Snippet Copied!" : "Share My Carbon Savings"}</span>
+              </button>
+            </div>
+          </div>
+
         </div>
 
         {/* Column 2: Precise Diagnostic entry Form */}
@@ -224,7 +388,7 @@ export const QuickTracker: React.FC = () => {
                       else if (cat === 'shopping') setActionType('clothing_purchase');
                       else if (cat === 'waste') setActionType('composted');
                     }}
-                    className="w-full rounded-lg border border-stone-200 bg-stone-50/50 px-3.5 py-2 text-xs focus:border-forest-600 focus:bg-white focus:outline-hidden dark:bg-stone-950 dark:border-stone-850"
+                    className="w-full rounded-lg border border-stone-200 px-3.5 py-2 text-xs focus:border-forest-600 focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                   >
                     <option value="transport">Transport / Travel</option>
                     <option value="food">Diet / Dining</option>
@@ -241,7 +405,7 @@ export const QuickTracker: React.FC = () => {
                     id="select-tracker-action"
                     value={actionType}
                     onChange={(e) => setActionType(e.target.value)}
-                    className="w-full rounded-lg border border-stone-200 bg-stone-50/50 px-3.5 py-2 text-xs focus:border-forest-600 focus:bg-white focus:outline-hidden dark:bg-stone-950 dark:border-stone-850"
+                    className="w-full rounded-lg border border-stone-200 px-3.5 py-2 text-xs focus:border-forest-600 focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                   >
                     {category === 'transport' && (
                       <>
@@ -305,7 +469,7 @@ export const QuickTracker: React.FC = () => {
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
                   placeholder={`e.g. Completed ${value} ${unit} action`}
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50/50 px-3.5 py-2 text-xs focus:border-forest-600 focus:bg-white focus:outline-hidden dark:bg-stone-950 dark:border-stone-850"
+                  className="w-full rounded-lg border border-stone-200 px-3.5 py-2 text-xs focus:border-forest-600 focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 />
               </div>
 

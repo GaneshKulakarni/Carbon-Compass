@@ -120,7 +120,7 @@ export const OnboardingFlow: React.FC = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Alex"
-                className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm focus:border-forest-600 focus:bg-white focus:outline-hidden dark:border-stone-850 dark:bg-stone-950 dark:focus:border-forest-400"
+                className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm focus:border-forest-600 focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950 dark:focus:border-forest-400"
               />
             </div>
 
@@ -133,7 +133,7 @@ export const OnboardingFlow: React.FC = () => {
                   id="select-onboarding-region"
                   value={region}
                   onChange={(e) => setRegion(e.target.value)}
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm focus:border-forest-600 focus:bg-white focus:outline-hidden dark:border-stone-850 dark:bg-stone-950"
+                  className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm focus:border-forest-600 focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 >
                   <option value="US">United States (High Average)</option>
                   <option value="EU">European Union (Moderate average)</option>
@@ -152,7 +152,7 @@ export const OnboardingFlow: React.FC = () => {
                   id="select-onboarding-household"
                   value={householdSize}
                   onChange={(e) => setHouseholdSize(Number(e.target.value))}
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm focus:border-forest-600 focus:bg-white focus:outline-hidden dark:border-stone-850 dark:bg-stone-950"
+                  className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm focus:border-forest-600 focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 >
                   <option value={1}>1 person (Single Dweller)</option>
                   <option value={2}>2 people (Shared resources)</option>
@@ -351,7 +351,7 @@ export const OnboardingFlow: React.FC = () => {
                   id="select-onboarding-shopping"
                   value={shoppingHabits}
                   onChange={(e) => setShoppingHabits(e.target.value as any)}
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm focus:border-forest-600 focus:bg-white focus:outline-hidden dark:border-stone-850 dark:bg-stone-950"
+                  className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm focus:border-forest-600 focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 >
                   <option value="frequent">Frequent (Buy new clothes/gadgets monthly)</option>
                   <option value="average">Normal (Buy goods only when essential)</option>
@@ -367,7 +367,7 @@ export const OnboardingFlow: React.FC = () => {
                   id="select-onboarding-waste"
                   value={wasteHabits}
                   onChange={(e) => setWasteHabits(e.target.value as any)}
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm focus:border-forest-600 focus:bg-white focus:outline-hidden dark:border-stone-850 dark:bg-stone-950"
+                  className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm focus:border-forest-600 focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 >
                   <option value="recycles_all">Comprehensive (Recycle & compost everything)</option>
                   <option value="recycles_some">Partial (Recycle containers, but landfill food waste)</option>

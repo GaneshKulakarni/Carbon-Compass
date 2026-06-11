@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Goal } from '../types';
-import { Award, Flame, Check, Plus, Trash2, ShieldCheck, HelpCircle, Sparkles } from 'lucide-react';
+import { 
+  Award, Flame, Check, Plus, Trash2, ShieldCheck, HelpCircle, 
+  Sparkles, Shield, ToggleLeft, ToggleRight, Power, Activity 
+} from 'lucide-react';
 
 export const GoalTracker: React.FC = () => {
   const { goals, setGoals, badges, logGoalProgress, toggleGoalStatus } = useApp();
@@ -13,6 +16,39 @@ export const GoalTracker: React.FC = () => {
   const [newReduction, setNewReduction] = useState<number>(20);
   const [newSavings, setNewSavings] = useState<number>(10);
   const [success, setSuccess] = useState('');
+
+  // Streak protection shields local persistence
+  const [weekendShield, setWeekendShield] = useState(() => localStorage.getItem('cc_weekend_shield') === 'true');
+  const [travelShield, setTravelShield] = useState(() => localStorage.getItem('cc_travel_shield') === 'true');
+
+  const handleToggleShield = (type: 'weekend' | 'travel') => {
+    if (type === 'weekend') {
+      const next = !weekendShield;
+      setWeekendShield(next);
+      localStorage.setItem('cc_weekend_shield', String(next));
+    } else {
+      const next = !travelShield;
+      setTravelShield(next);
+      localStorage.setItem('cc_travel_shield', String(next));
+    }
+  };
+
+  // Dynamic habit metrics calculations
+  const totalGoals = goals.length;
+  const completedGoals = goals.filter(g => g.status === 'completed').length;
+  const onTrackGoals = goals.filter(g => g.progress > 0 && g.status !== 'completed').length;
+  const inactiveGoals = goals.filter(g => g.progress === 0).length;
+
+  const completionRatio = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 105) : 0;
+  const adjustedCompletion = Math.min(100, completionRatio); // capped at 100
+
+  // Celebratory Milestone unlock triggers
+  const recentEarnedBadge = React.useMemo(() => {
+    const earned = badges.filter(b => b.earnedAt);
+    if (earned.length === 0) return null;
+    // return most recently earned
+    return [...earned].sort((a,b) => new Date(b.earnedAt!).getTime() - new Date(a.earnedAt!).getTime())[0];
+  }, [badges]);
 
   const handleAddNewGoal = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,11 +95,123 @@ export const GoalTracker: React.FC = () => {
         </div>
       )}
 
+      {/* Milestone Celebrations Box */}
+      {recentEarnedBadge && (
+        <div className="mb-6 p-5 rounded-2xl border-2 border-emerald-500 bg-emerald-500/5 dark:bg-emerald-900/10 shadow-lg relative overflow-hidden animate-fade-in flex items-center justify-between" id="milestone-celebration-banner">
+          <div className="absolute -top-10 -right-10 h-24 w-24 rounded-full bg-emerald-500/10 blur-xl pointer-events-none"></div>
+          <div className="flex gap-4 items-center">
+            <span className="text-4xl animate-bounce">🏆</span>
+            <div>
+              <span className="text-[10px] uppercase font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-450 px-2 py-0.5 rounded font-bold">Milestone Achievement Unlocked!</span>
+              <h3 className="font-display font-extrabold text-stone-900 dark:text-stone-100 text-base mt-1.5 flex items-center gap-1.5">
+                <span>Earned planetary badge: "{recentEarnedBadge.title}"!</span>
+                <Sparkles className="h-4 w-4 text-emerald-500 animate-pulse" />
+              </h3>
+              <p className="text-[11.5px] text-stone-550 dark:text-stone-400 mt-1 leading-relaxed">
+                {recentEarnedBadge.description}
+              </p>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <span className="text-[10px] font-mono text-stone-400">Awarded recently</span>
+          </div>
+        </div>
+      )}
+
       {/* Main split: active goals vs achievement trophy cabinet */}
       <div className="grid gap-8 lg:grid-cols-3">
 
-        {/* Column 1 & 2: Habits lists and custom form */}
+        {/* Column 1 & 2: Habits lists, performance, streak protect, and custom form */}
         <div className="lg:col-span-2 space-y-6">
+
+          {/* Performance & Streak Protective Grid */}
+          <div className="grid gap-6 md:grid-cols-2">
+            
+            {/* Habit Performance Panel */}
+            <div className="rounded-2xl border border-stone-200/60 bg-white p-5 shadow-md dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between" id="habit-performance-panel">
+              <div>
+                <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono flex items-center gap-1">
+                  <Activity className="h-3.5 w-3.5 text-forest-700 dark:text-emerald-400 font-bold" />
+                  <span>Habit Performance Metrics</span>
+                </span>
+                <p className="text-xs text-stone-400 dark:text-stone-550 leading-snug mt-1">
+                  Compliance and completion statistics computed across your active carbon promises.
+                </p>
+
+                <div className="flex items-end justify-between mt-5">
+                  <div>
+                    <span className="text-3xl font-display font-extrabold text-stone-900 dark:text-stone-50 leading-none">
+                      {adjustedCompletion}%
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-600 block mt-1 font-bold">
+                      {adjustedCompletion >= 75 ? "★ HIGH COMPLIANCE" : adjustedCompletion >= 40 ? "✦ MODERATE COMPLIANCE" : "⚠ LOW COMPLIANCE"}
+                    </span>
+                  </div>
+                  <div className="text-right text-[11px] text-stone-505 dark:text-stone-305 space-y-0.5">
+                    <div>Completed: <strong>{completedGoals}</strong></div>
+                    <div>On Track: <strong>{onTrackGoals}</strong></div>
+                    <div>Inactive: <strong>{inactiveGoals}</strong></div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800">
+                <div className="h-2 w-full bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                    style={{ width: `${adjustedCompletion}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Streak Protection Panel */}
+            <div className="rounded-2xl border border-stone-200/60 bg-white p-5 shadow-md dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between" id="streak-protection-panel">
+              <div>
+                <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono flex items-center gap-1">
+                  <Shield className="h-3.5 w-3.5 text-amber-500" />
+                  <span>Streak Protection Shield</span>
+                </span>
+                <p className="text-xs text-stone-400 dark:text-stone-550 leading-snug mt-1">
+                  Safeguard active consecutive logged choices streak and protect progress records when away.
+                </p>
+
+                <div className="space-y-3 mt-4">
+                  
+                  {/* Freeze weekend shield */}
+                  <div className="flex justify-between items-center bg-stone-50 dark:bg-stone-950/60 p-2.5 rounded-xl border border-stone-150 dark:border-stone-850">
+                    <div>
+                      <span className="text-[11px] font-bold text-stone-800 dark:text-stone-200 block leading-tight">Weekend Freeze Shield</span>
+                      <span className="text-[9.5px] text-stone-400">Protects active streaks on Sat & Sun</span>
+                    </div>
+                    <button 
+                      onClick={() => handleToggleShield('weekend')}
+                      className={`p-1 rounded cursor-pointer transition-colors ${weekendShield ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-300 dark:text-stone-705'}`}
+                      id="btn-toggle-weekend-shield"
+                    >
+                      {weekendShield ? <ToggleRight className="h-7 w-7" /> : <ToggleLeft className="h-7 w-7" />}
+                    </button>
+                  </div>
+
+                  {/* Travel protection shield */}
+                  <div className="flex justify-between items-center bg-stone-50 dark:bg-stone-950/60 p-2.5 rounded-xl border border-stone-150 dark:border-stone-850">
+                    <div>
+                      <span className="text-[11px] font-bold text-stone-800 dark:text-stone-200 block leading-tight">Travel Protection Shield</span>
+                      <span className="text-[9.5px] text-stone-400">Freeze streaks during holiday periods</span>
+                    </div>
+                    <button 
+                      onClick={() => handleToggleShield('travel')}
+                      className={`p-1 rounded cursor-pointer transition-colors ${travelShield ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-300 dark:text-stone-705'}`}
+                      id="btn-toggle-travel-shield"
+                    >
+                      {travelShield ? <ToggleRight className="h-7 w-7" /> : <ToggleLeft className="h-7 w-7" />}
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
 
           {/* Active Goals list cards */}
           <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900">
@@ -184,7 +332,7 @@ export const GoalTracker: React.FC = () => {
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="e.g. Bring a canvas shopping tote to grocery stores"
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50/50 px-3.5 py-2.5 text-xs focus:border-forest-600 focus:bg-white focus:outline-hidden dark:bg-stone-950 dark:border-stone-850"
+                  className="w-full rounded-lg border border-stone-200 px-3.5 py-2.5 text-xs focus:border-forest-600 focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                 />
               </div>
 
@@ -196,7 +344,7 @@ export const GoalTracker: React.FC = () => {
                     id="select-new-goal-cat"
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value as any)}
-                    className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3.5 py-2 text-xs focus:outline-hidden dark:bg-stone-950 dark:border-stone-850"
+                    className="w-full rounded-lg border border-stone-200 px-3.5 py-2 text-xs focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                   >
                     <option value="transport">Transport</option>
                     <option value="food">Food</option>
@@ -212,7 +360,7 @@ export const GoalTracker: React.FC = () => {
                     id="input-new-goal-target"
                     type="number"
                     min="1"
-                    className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3.5 py-2 text-xs focus:outline-hidden dark:bg-stone-950"
+                    className="w-full rounded-lg border border-stone-200 px-3.5 py-2 text-xs focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                     value={newTarget}
                     onChange={(e) => setNewTarget(Number(e.target.value))}
                   />
@@ -224,7 +372,7 @@ export const GoalTracker: React.FC = () => {
                     id="input-new-goal-reduce"
                     type="number"
                     min="1"
-                    className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3.5 py-2 text-xs focus:outline-hidden dark:bg-stone-950"
+                    className="w-full rounded-lg border border-stone-200 px-3.5 py-2 text-xs focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                     value={newReduction}
                     onChange={(e) => setNewReduction(Number(e.target.value))}
                   />
@@ -236,7 +384,7 @@ export const GoalTracker: React.FC = () => {
                     id="input-new-goal-save"
                     type="number"
                     min="0"
-                    className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3.5 py-2 text-xs focus:outline-hidden dark:bg-stone-950"
+                    className="w-full rounded-lg border border-stone-200 px-3.5 py-2 text-xs focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:bg-stone-50 dark:focus:bg-stone-950"
                     value={newSavings}
                     onChange={(e) => setNewSavings(Number(e.target.value))}
                   />

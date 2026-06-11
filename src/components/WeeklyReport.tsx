@@ -157,6 +157,59 @@ export const WeeklyReport: React.FC = () => {
             </div>
           </div>
 
+          {/* Habit Success Summary */}
+          <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-xs dark:border-stone-850 dark:bg-stone-900 space-y-4" id="habit-success-summary-card">
+            <h3 className="font-display font-bold text-stone-900 dark:text-stone-50 text-base mb-1.5 flex items-center justify-between">
+              <span>Habit Success Summary</span>
+              <span className="text-xs font-mono font-bold bg-amber-50 text-amber-801 dark:bg-amber-950/40 dark:text-amber-450 px-2 py-0.5 rounded">
+                {goals.length} Promises Active
+              </span>
+            </h3>
+            <p className="text-xs text-stone-400 leading-relaxed">
+              Real-time overview of active carbon pledges and recurring habit compliance streaks:
+            </p>
+
+            <div className="space-y-4 mt-2">
+              {goals.map((goal) => {
+                const progressPercent = Math.min(100, Math.round(((goal.progress || 0) / (goal.targetValue || 1)) * 100));
+                return (
+                  <div key={goal.id} className="p-3.5 bg-stone-50 dark:bg-stone-950/40 rounded-xl border border-stone-150 dark:border-stone-850 flex items-center justify-between text-xs">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold font-mono tracking-wider text-forest-700 dark:text-emerald-400 capitalize bg-forest-50 dark:bg-forest-950/30 px-1.5 py-0.2 rounded font-semibold">
+                        {goal.category}
+                      </span>
+                      <h6 className="font-bold text-stone-855 dark:text-stone-100 flex items-center gap-1.5 pt-0.5">
+                        <span>{goal.title}</span>
+                      </h6>
+                      <div className="flex gap-2 text-[10.5px] text-stone-400 mt-0.5 font-sans">
+                        <span>Progress: <strong>{goal.progress}/{goal.targetValue}</strong></span>
+                        <span>•</span>
+                        <span>Streak: <strong>🔥 {goal.streak || 0} days</strong></span>
+                      </div>
+                    </div>
+
+                    <div className="text-right space-y-1.5 shrink-0 ml-4">
+                      <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">↓ {goal.estimatedReduction} kg/mo</span>
+                      <div className="h-1.5 w-16 bg-stone-200 dark:bg-stone-800 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                          style={{ width: `${progressPercent}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {goals.length === 0 && (
+                <div className="text-center py-8 text-stone-400 font-sans">
+                  <span className="text-2xl block mb-2">⚡</span>
+                  <p className="text-xs">No active goal promises. Set some choices on the Habit Simulator tab!</p>
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
 
         {/* Column 3: Screenshot shareable summary mockup card */}
