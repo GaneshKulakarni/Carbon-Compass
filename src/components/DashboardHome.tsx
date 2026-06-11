@@ -325,18 +325,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
 
         {/* 3D Planet Vitality Globe Card - takes 2 cols */}
         <div className="md:col-span-2 rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between">
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono">interactive planetary model</span>
-              <span className="text-[10px] uppercase font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-bold dark:bg-emerald-950/20 dark:text-emerald-400">Carbon Response Live</span>
-            </div>
-            <p className="text-[11.5px] text-stone-500 dark:text-stone-400 leading-relaxed mt-1">
-              Holographic model representing ecological balance. Point cluster colors shift globally in real-time as you log energy saves or transport offsets.
-            </p>
-          </div>
-          <div className="mt-3.5">
-            <InteractiveGlobe progressPercent={progressPercent} size="sm" />
-          </div>
+          <InteractiveGlobe size="sm" />
         </div>
 
       </div>

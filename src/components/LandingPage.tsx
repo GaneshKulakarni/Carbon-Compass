@@ -191,7 +191,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                   </p>
                 </div>
                 <div className="mt-1">
-                  <InteractiveGlobe progressPercent={44} size="sm" />
+                  <InteractiveGlobe showOnlyGlobe={true} size="sm" />
                 </div>
               </div>
 
