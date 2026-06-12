@@ -7,8 +7,107 @@ import {
 } from 'lucide-react';
 
 export const GoalTracker: React.FC = () => {
-  const { goals, setGoals, badges, logGoalProgress, toggleGoalStatus } = useApp();
+  const { 
+    goals, setGoals, badges, logGoalProgress, toggleGoalStatus,
+    activityLogs, completedLessons 
+  } = useApp();
   
+  // Dynamic current streak calculation (matches DashboardHome logic)
+  const currentStreak = React.useMemo(() => {
+    if (activityLogs.length === 0) return 0;
+    const dates = Array.from(new Set(activityLogs.map(log => log.createdAt.split('T')[0]))) as string[];
+    dates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    
+    const todayStr = new Date().toISOString().split('T')[0];
+    const yesterdayStr = new Date(Date.now() - 24 * 3600 * 1000).toISOString().split('T')[0];
+    
+    let current = 0;
+    const hasLogToday = dates.includes(todayStr);
+    const hasLogYesterday = dates.includes(yesterdayStr);
+    
+    if (hasLogToday || hasLogYesterday) {
+      let checkDate = new Date();
+      if (!hasLogToday && hasLogYesterday) {
+        checkDate = new Date(Date.now() - 24 * 3600 * 1000);
+      }
+      
+      let checkStr = checkDate.toISOString().split('T')[0];
+      while (dates.includes(checkStr)) {
+        current++;
+        checkDate.setDate(checkDate.getDate() - 1);
+        checkStr = checkDate.toISOString().split('T')[0];
+      }
+    }
+    return current;
+  }, [activityLogs]);
+
+  // Dynamic Badge Progress calculation
+  const getBadgeProgress = (badgeId: string) => {
+    let current = 0;
+    let target = 1;
+    let unit = "";
+
+    switch (badgeId) {
+      case 'b_first_log':
+        target = 1;
+        current = activityLogs.length >= 1 ? 1 : 0;
+        unit = "log";
+        break;
+      case 'b_streak_3':
+        target = 3;
+        current = Math.min(3, currentStreak);
+        unit = "days";
+        break;
+      case 'b_commute':
+        target = 20;
+        current = Math.round(
+          Math.abs(
+            activityLogs
+              .filter(l => l.category === 'transport' && l.estimatedEmission < 0)
+              .reduce((acc, log) => acc + log.estimatedEmission, 0)
+          )
+        );
+        unit = "kg CO₂";
+        break;
+      case 'b_eater':
+        target = 5;
+        current = activityLogs.filter(l => l.category === 'food' && (l.actionType === 'vegetarian_meal' || l.actionType === 'vegan_meal')).length;
+        unit = "meals";
+        break;
+      case 'b_energy':
+        target = 4;
+        current = activityLogs.filter(l => l.category === 'home').length;
+        unit = "saves";
+        break;
+      case 'b_waste':
+        target = 10;
+        current = activityLogs.filter(l => l.category === 'waste').length;
+        unit = "times";
+        break;
+      case 'b_saving_50':
+        target = 50;
+        current = Math.round(
+          Math.abs(
+            activityLogs
+              .filter(log => log.estimatedEmission < 0)
+              .reduce((acc, log) => acc + log.estimatedEmission, 0)
+          )
+        );
+        unit = "kg CO₂";
+        break;
+      case 'b_truth_seeker':
+        target = 3;
+        current = completedLessons.length;
+        unit = "lessons";
+        break;
+      default:
+        break;
+    }
+
+    const percent = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+    return { current, target, percent, unit };
+  };
+
   // Custom goal parameters
   const [newTitle, setNewTitle] = useState('');
   const [newCategory, setNewCategory] = useState<'transport' | 'food' | 'home' | 'shopping' | 'waste'>('transport');
@@ -421,32 +520,49 @@ export const GoalTracker: React.FC = () => {
             <div className="grid gap-3">
               {badges.map((badge) => {
                 const isEarned = !!badge.earnedAt;
+                const prog = getBadgeProgress(badge.id);
                 return (
                   <div 
                     key={badge.id}
-                    className={`p-3 rounded-xl border flex items-center gap-3.5 transition-all ${
+                    className={`p-3.5 rounded-xl border flex flex-col gap-2.5 transition-all ${
                       isEarned 
                         ? 'border-indigo-100 bg-indigo-50/20 dark:border-indigo-900/30 dark:bg-indigo-950/10' 
-                        : 'border-stone-100 opacity-55 dark:border-stone-850'
+                        : 'border-stone-200/60 bg-white dark:border-stone-850 dark:bg-stone-900/60 shadow-xs'
                     }`}
                   >
-                    {/* Badge Emoji Circle */}
-                    <div className={`h-11 w-11 rounded-full shrink-0 flex items-center justify-center text-xl shadow-xs select-none ${isEarned ? 'bg-indigo-50 dark:bg-indigo-900/40 animate-pulse' : 'bg-stone-100 dark:bg-stone-800'}`}>
-                      {badge.icon}
+                    <div className="flex items-start gap-3.5">
+                      {/* Badge Emoji Circle */}
+                      <div className={`h-11 w-11 rounded-full shrink-0 flex items-center justify-center text-xl shadow-xs select-none ${isEarned ? 'bg-indigo-50 dark:bg-indigo-900/40 animate-pulse' : 'bg-stone-100 dark:bg-stone-800'}`}>
+                        {badge.icon}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="font-bold text-xs text-stone-900 dark:text-stone-100 truncate">{badge.title}</h4>
+                          {isEarned && (
+                            <span className="text-[9px] uppercase tracking-wider font-bold font-mono font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded shrink-0 dark:bg-indigo-950 dark:text-indigo-400">
+                              Earned
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-stone-400 dark:text-stone-500 font-sans leading-snug mt-0.5">
+                          {badge.description}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="font-bold text-xs text-stone-905 dark:text-stone-100 truncate">{badge.title}</h4>
-                        {isEarned && (
-                          <span className="text-[9px] uppercase tracking-wider font-bold font-mono font-semibold text-indigo-700 bg-indigo-50 px-1 py-0.2 rounded shrink-0 dark:bg-indigo-950 dark:text-indigo-400">
-                            Earned
-                          </span>
-                        )}
+                    {/* Progress Slider Line for Achievements */}
+                    <div className="mt-1">
+                      <div className="flex justify-between items-center text-[9px] font-mono font-bold text-stone-400 dark:text-stone-550 mb-1">
+                        <span>{prog.current} / {prog.target} {prog.unit}</span>
+                        <span>{prog.percent}%</span>
                       </div>
-                      <p className="text-[10px] text-stone-400 dark:text-stone-500 font-sans leading-tight mt-0.5">
-                        {badge.description}
-                      </p>
+                      <div className="h-1.5 w-full bg-stone-100 dark:bg-stone-850 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-500 ${isEarned ? 'bg-emerald-500' : 'bg-forest-600'}`}
+                          style={{ width: `${prog.percent}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 );

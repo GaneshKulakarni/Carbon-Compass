@@ -34,10 +34,12 @@ Built with **React 19**, **Vite 6**, **Tailwind CSS v4**, **TypeScript**, and **
 
 ### 6. Badges & Habits Cabinet
 *   **Goal Tracking Checklist:** Live tracker checklists allowing users to log incremental completions of goals (e.g., "Wash laundry on cold") to accumulate hot streaks!
+*   **Dynamic Achievement Progress Tracks:** Displays real-time progress bars (e.g., `4/10 meals`, `40%`) that immediately recalculate and animate whenever habits, logs, streaks, or lessons change, providing visual milestones prior to unlocking badges.
 *   **Badge Trophy Shelf:** Interlocking accomplishment triggers that award specific badges (as you log behaviors) like *First Log*, *Transit Hero*, *Zero Waste Monk*, or *Planet Protector*!
 
-### 7. Weekly Compliance reports
-*   **Screenshot Share Card:** Generates a custom, high-contrast, screenshot-ready badge summary containing of validation tags that judges can snapshot during demo presentations.
+### 7. Weekly Compliance Reports
+*   **Screenshot Share Card:** Generates a custom, high-contrast, screenshot-ready badge summary consisting of validation tags that judges can snapshot during demo presentations.
+*   **Real-World Sharing Suite:** Fully operational sharing features including direct social broadcasting to **LinkedIn**, **WhatsApp**, and **Email**; a One-Click ready-to-paste copied snippet generator; a smart Mobile Share API wrapper; and a downloadable verified climate certificate receipt (`.txt` formatted with cryptographic-style validation tags).
 
 ### 8. Sandbox Control Room (Demo Mode)
 *   **One-Click Judge Seeding:** Instant seed trigger representing **"Alex"** (busy urban professional) that instantaneously populates active gauges, historical activity lists, logged saves, and goals, bypassing tedious typing during reviews!
