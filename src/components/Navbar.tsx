@@ -7,6 +7,7 @@ export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
+    { id: 'landing', label: 'Exhibition', icon: Compass },
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'tracker', label: 'Tracker', icon: ClipboardList },
     { id: 'simulator', label: 'Simulator', icon: TrendingUp },
@@ -28,7 +29,7 @@ export const Navbar: React.FC = () => {
           
           {/* Logo Name */}
           <div 
-            onClick={() => handleNav(user ? 'dashboard' : 'landing')} 
+            onClick={() => handleNav('landing')} 
             className="flex cursor-pointer items-center space-x-2.5 group"
             id="nav-logo-container"
           >

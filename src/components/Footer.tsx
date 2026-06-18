@@ -47,11 +47,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenMethodology }) => {
 
         <div className="mt-8 border-t border-stone-200/50 pt-8 dark:border-stone-800/40 flex flex-col items-center justify-between gap-4 sm:flex-row text-[11px] text-stone-400 dark:text-stone-500">
           <p>© {new Date().getFullYear()} Carbon Compass. All rights reserved.</p>
-          <div className="flex items-center space-x-1 px-3 py-1 bg-stone-100 rounded dark:bg-stone-905">
-            <span>Crafted with</span>
-            <Heart className="h-3 w-3 fill-rose-500 text-rose-500" />
-            <span>by Senior Hackathon Finalists</span>
-          </div>
         </div>
       </div>
     </footer>

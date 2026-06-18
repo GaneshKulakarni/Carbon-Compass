@@ -19,6 +19,10 @@ function MainAppContent() {
 
   // Router dispatcher
   const renderTabContent = () => {
+    if (activeTab === 'landing') {
+      return <LandingPage onOpenMethodology={() => setIsMethodologyOpen(true)} />;
+    }
+
     if (!user) {
       if (activeTab === 'onboarding') {
         return <OnboardingFlow />;

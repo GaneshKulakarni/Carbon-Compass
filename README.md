@@ -8,10 +8,12 @@ Built with **React 19**, **Vite 6**, **Tailwind CSS v4**, **TypeScript**, and **
 
 ## 🚀 Live Features Implemented
 
-### 1. Stunning Landing Page
-*   **Premium Startup Aesthetic:** Features a custom dot-grid canvas, spacious typography, smooth transitions, and glowing interactive cards.
-*   **Full Context Mockup:** Renders live, responsive carbon budget indicators and circular gauges to demonstrate the logged-in app experience at first glance.
-*   **Frictionless Storyboard:** Features a 3-step storyboard explaining the tracking flow, alongside collapsible interactive FAQs to answer technical queries.
+### 1. Human-Centric Ecological Exhibition Landing Page
+*   **"Confronting Our Scars" Exhibition**: An organic, statefully animated gallery of the five physical environmental tragedies you uploaded. Renders rich, curated backdrops detailing marine plastic strangulation (plastic glove clownfish), industrial dualism memory, climate cities space, plastic sea swimmers, and endless landfills.
+*   **Emotional Narrative & Motive**: Describes our mission in a raw, editorial voice that avoids mechanical robotic styling to spark actionable, customized agency.
+*   **The "Cost vs. Healing" Interactive Split**: A high-impact contrast panel where the audience can toggle between raw structural environmental scars and **The Restorative 3D Globe View**—showing how habit logging directly heals a digital twin earth model in real-time.
+*   **Top Sustainability Research Citations**: Deep typographic references to peer-reviewed climate data organizations on the web, including direct portals for **Project Drawdown**, **WWF**, **World Resources Institute**, **Earthday Network**, and **UN Climate Change (UNFCCC)**.
+*   **Minimalist Interactive FAQ**: Immersive paper-textured accordions answering foundational client queries on data sovereignty and calculation systems.
 
 ### 2. Painless Visual Onboarding
 *   **Custom Questionnaire Cards:** Guides users step-by-step through geographic regions, household sizes, transport methods, flights, and dietary habits with sliders and custom button arrays.
