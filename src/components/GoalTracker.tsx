@@ -138,7 +138,7 @@ export const GoalTracker: React.FC = () => {
   const onTrackGoals = goals.filter(g => g.progress > 0 && g.status !== 'completed').length;
   const inactiveGoals = goals.filter(g => g.progress === 0).length;
 
-  const completionRatio = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 105) : 0;
+  const completionRatio = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
   const adjustedCompletion = Math.min(100, completionRatio); // capped at 100
 
   // Celebratory Milestone unlock triggers
@@ -201,12 +201,12 @@ export const GoalTracker: React.FC = () => {
           <div className="flex gap-4 items-center">
             <span className="text-4xl animate-bounce">🏆</span>
             <div>
-              <span className="text-[10px] uppercase font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-450 px-2 py-0.5 rounded font-bold">Milestone Achievement Unlocked!</span>
+              <span className="text-[10px] uppercase font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400 px-2 py-0.5 rounded font-bold">Milestone Achievement Unlocked!</span>
               <h3 className="font-display font-extrabold text-stone-900 dark:text-stone-100 text-base mt-1.5 flex items-center gap-1.5">
                 <span>Earned planetary badge: "{recentEarnedBadge.title}"!</span>
                 <Sparkles className="h-4 w-4 text-emerald-500 animate-pulse" />
               </h3>
-              <p className="text-[11.5px] text-stone-550 dark:text-stone-400 mt-1 leading-relaxed">
+              <p className="text-[11.5px] text-stone-500 dark:text-stone-400 mt-1 leading-relaxed">
                 {recentEarnedBadge.description}
               </p>
             </div>
@@ -233,7 +233,7 @@ export const GoalTracker: React.FC = () => {
                   <Activity className="h-3.5 w-3.5 text-forest-700 dark:text-emerald-400 font-bold" />
                   <span>Habit Performance Metrics</span>
                 </span>
-                <p className="text-xs text-stone-400 dark:text-stone-550 leading-snug mt-1">
+                <p className="text-xs text-stone-400 dark:text-stone-500 leading-snug mt-1">
                   Compliance and completion statistics computed across your active carbon promises.
                 </p>
 
@@ -246,7 +246,7 @@ export const GoalTracker: React.FC = () => {
                       {adjustedCompletion >= 75 ? "★ HIGH COMPLIANCE" : adjustedCompletion >= 40 ? "✦ MODERATE COMPLIANCE" : "⚠ LOW COMPLIANCE"}
                     </span>
                   </div>
-                  <div className="text-right text-[11px] text-stone-505 dark:text-stone-305 space-y-0.5">
+                  <div className="text-right text-[11px] text-stone-500 dark:text-stone-300 space-y-0.5">
                     <div>Completed: <strong>{completedGoals}</strong></div>
                     <div>On Track: <strong>{onTrackGoals}</strong></div>
                     <div>Inactive: <strong>{inactiveGoals}</strong></div>
@@ -270,7 +270,7 @@ export const GoalTracker: React.FC = () => {
                   <Shield className="h-3.5 w-3.5 text-amber-500" />
                   <span>Streak Protection Shield</span>
                 </span>
-                <p className="text-xs text-stone-400 dark:text-stone-550 leading-snug mt-1">
+                <p className="text-xs text-stone-400 dark:text-stone-500 leading-snug mt-1">
                   Safeguard active consecutive logged choices streak and protect progress records when away.
                 </p>
 
@@ -284,7 +284,7 @@ export const GoalTracker: React.FC = () => {
                     </div>
                     <button 
                       onClick={() => handleToggleShield('weekend')}
-                      className={`p-1 rounded cursor-pointer transition-colors ${weekendShield ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-300 dark:text-stone-705'}`}
+                      className={`p-1 rounded cursor-pointer transition-colors ${weekendShield ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-300 dark:text-stone-700'}`}
                       id="btn-toggle-weekend-shield"
                     >
                       {weekendShield ? <ToggleRight className="h-7 w-7" /> : <ToggleLeft className="h-7 w-7" />}
@@ -299,7 +299,7 @@ export const GoalTracker: React.FC = () => {
                     </div>
                     <button 
                       onClick={() => handleToggleShield('travel')}
-                      className={`p-1 rounded cursor-pointer transition-colors ${travelShield ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-300 dark:text-stone-705'}`}
+                      className={`p-1 rounded cursor-pointer transition-colors ${travelShield ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-300 dark:text-stone-700'}`}
                       id="btn-toggle-travel-shield"
                     >
                       {travelShield ? <ToggleRight className="h-7 w-7" /> : <ToggleLeft className="h-7 w-7" />}
@@ -553,7 +553,7 @@ export const GoalTracker: React.FC = () => {
 
                     {/* Progress Slider Line for Achievements */}
                     <div className="mt-1">
-                      <div className="flex justify-between items-center text-[9px] font-mono font-bold text-stone-400 dark:text-stone-550 mb-1">
+                      <div className="flex justify-between items-center text-[9px] font-mono font-bold text-stone-400 dark:text-stone-500 mb-1">
                         <span>{prog.current} / {prog.target} {prog.unit}</span>
                         <span>{prog.percent}%</span>
                       </div>

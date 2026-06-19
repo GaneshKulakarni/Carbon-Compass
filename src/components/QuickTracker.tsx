@@ -39,7 +39,7 @@ export const QuickTracker: React.FC = () => {
       id: "preset_vegan_burger",
       label: "Plant-Based Breakfast/Lunch",
       desc: "Vegan burger / veggie salad swap",
-      category: "food text-xs" as const,
+      category: "food" as const,
       action: "vegan_meal",
       val: 1,
       unit: "meal",
@@ -270,7 +270,7 @@ export const QuickTracker: React.FC = () => {
               <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600" />
               <span>My Daily Habit Checklist</span>
             </h3>
-            <p className="text-xs text-stone-450 dark:text-stone-400 mb-4 leading-relaxed">
+            <p className="text-xs text-stone-400 dark:text-stone-400 mb-4 leading-relaxed">
               Check off recurring sustainable micro-actions you completed today. Checking logs their relative carbon savings score automatically!
             </p>
 
@@ -309,10 +309,10 @@ export const QuickTracker: React.FC = () => {
           {/* Social Impact Share Card */}
           <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900" id="impact-share-card">
             <h3 className="font-display font-bold text-stone-900 dark:text-stone-50 text-base mb-1.5 flex items-center gap-1.5">
-              <Compass className="h-4.5 w-4.5 text-indigo-650 dark:text-indigo-400" />
+              <Compass className="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400" />
               <span>My Shareable Impact Summary</span>
             </h3>
-            <p className="text-xs text-stone-450 dark:text-stone-400 mb-4 leading-relaxed">
+            <p className="text-xs text-stone-400 dark:text-stone-400 mb-4 leading-relaxed">
               Generate high-visibility social network snippets highlighting your total verified carbon saves on Carbon Compass.
             </p>
 
@@ -333,7 +333,7 @@ export const QuickTracker: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="flex justify-between items-center pt-2 border-t border-stone-200/50 dark:border-stone-800/80 text-[10px] text-stone-450 font-mono">
+                <div className="flex justify-between items-center pt-2 border-t border-stone-200/50 dark:border-stone-800/80 text-[10px] text-stone-400 font-mono">
                   <span>🔥 Streak Record Active</span>
                   <span className="text-indigo-600 font-bold dark:text-indigo-400">#ClimateHackathon</span>
                 </div>

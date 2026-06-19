@@ -26,6 +26,8 @@ export const SettingsView: React.FC = () => {
   const [authPassword, setAuthPassword] = useState('');
   const [authName, setAuthName] = useState('');
   const [localError, setLocalError] = useState('');
+  // Confirmation guard for destructive reset operation
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,8 +51,8 @@ export const SettingsView: React.FC = () => {
         await signInEmail(authEmailVal.trim(), authPassword);
       }
       setAuthPassword('');
-    } catch (err: any) {
-      console.error(err);
+    } catch (err: unknown) {
+      console.error('[carbon-compass] Auth error:', err);
     }
   };
 
@@ -252,7 +254,7 @@ export const SettingsView: React.FC = () => {
                 <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-emerald-800 dark:text-emerald-400">✓ Sync Active</span>
-                    <span className="text-[9px] uppercase tracking-wider font-mono font-bold bg-emerald-105 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 px-1.5 py-0.2 rounded">Firestore</span>
+                    <span className="text-[9px] uppercase tracking-wider font-mono font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 px-1.5 py-0.2 rounded">Firestore</span>
                   </div>
                   <p className="text-stone-500 dark:text-stone-400 text-[11px] leading-relaxed">
                     Your baseline footprint, daily tracker items, and habits are permanently secured.
@@ -293,12 +295,12 @@ export const SettingsView: React.FC = () => {
                 </div>
 
                 {localError && (
-                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-100 text-[10px] text-rose-700 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-455 font-semibold">
+                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-100 text-[10px] text-rose-700 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-400 font-semibold">
                     {localError}
                   </div>
                 )}
                 {authError && (
-                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-100 text-[10px] text-rose-700 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-455 font-semibold max-h-24 overflow-y-auto custom-scrollbar">
+                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-100 text-[10px] text-rose-700 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-400 font-semibold max-h-24 overflow-y-auto custom-scrollbar">
                     {authError}
                   </div>
                 )}
@@ -397,14 +399,38 @@ export const SettingsView: React.FC = () => {
                 </div>
               )}
 
-              <button
-                id="btn-settings-hard-reset"
-                onClick={resetAllData}
-                className="w-full flex items-center justify-center space-x-1.5 p-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-450 hover:text-rose-800 text-xs font-bold transition-all cursor-pointer"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>Format & Hard Reset data</span>
-              </button>
+              {!showResetConfirm ? (
+                <button
+                  id="btn-settings-hard-reset"
+                  onClick={() => setShowResetConfirm(true)}
+                  className="w-full flex items-center justify-center space-x-1.5 p-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-400 hover:text-rose-800 text-xs font-bold transition-all cursor-pointer"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Format &amp; Hard Reset data</span>
+                </button>
+              ) : (
+                <div className="p-3 rounded-xl border border-rose-300 bg-rose-50 dark:bg-rose-950/20 dark:border-rose-900/40 space-y-2">
+                  <p className="text-[11px] font-bold text-rose-700 dark:text-rose-400 text-center">
+                    ⚠️ This will permanently delete all your logs, goals, and settings. Are you sure?
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      id="btn-settings-reset-cancel"
+                      onClick={() => setShowResetConfirm(false)}
+                      className="flex-1 py-2 rounded-lg border border-stone-200 bg-white dark:bg-stone-900 dark:border-stone-800 text-stone-600 dark:text-stone-400 text-xs font-bold hover:bg-stone-50 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      id="btn-settings-reset-confirm"
+                      onClick={() => { resetAllData(); setShowResetConfirm(false); }}
+                      className="flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all"
+                    >
+                      Yes, Reset Everything
+                    </button>
+                  </div>
+                </div>
+              )}
 
             </div>
           </div>

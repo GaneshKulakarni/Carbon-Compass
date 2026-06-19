@@ -31,7 +31,8 @@ export const Navbar: React.FC = () => {
     theme, 
     setTheme, 
     firebaseUser, 
-    signOutFirebase 
+    signOutFirebase,
+    isDemoMode
   } = useApp();
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -108,12 +109,12 @@ export const Navbar: React.FC = () => {
               <span className="font-display text-sm font-extrabold tracking-tight text-stone-900 dark:text-stone-50 select-none">
                 Carbon<span className="text-forest-600 dark:text-emerald-400">Compass</span>
               </span>
-              {firebaseUser && user ? (
+              {(firebaseUser || isDemoMode) && user ? (
                 <span className="text-[8px] text-stone-400 font-mono font-bold -mt-0.5 tracking-wider uppercase">
                   {user.climatePersona || 'SUSTAINABLE OBSERVER'}
                 </span>
               ) : (
-                <span className="text-[8px] text-stone-450 dark:text-stone-500 font-mono font-bold -mt-0.5 tracking-wider uppercase">
+                <span className="text-[8px] text-stone-400 dark:text-stone-500 font-mono font-bold -mt-0.5 tracking-wider uppercase">
                   Eco-Meme Teaching Center
                 </span>
               )}
@@ -184,7 +185,7 @@ export const Navbar: React.FC = () => {
               >
                 <Wrench className="h-3.5 w-3.5" />
                 <span>Tools</span>
-                <ChevronDown className={`h-3 w-3 text-stone-405 transition-transform ${toolsDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-3 w-3 text-stone-400 transition-transform ${toolsDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Tools Dropdown Card */}
@@ -212,7 +213,7 @@ export const Navbar: React.FC = () => {
                           </div>
                           <div>
                             <div className="flex items-center gap-1.5">
-                              <span className={`text-xs font-bold ${isActive ? 'text-forest-700 dark:text-emerald-400' : 'text-stone-750 dark:text-stone-205'}`}>
+                              <span className={`text-xs font-bold ${isActive ? 'text-forest-700 dark:text-emerald-400' : 'text-stone-750 dark:text-stone-200'}`}>
                                 {item.label}
                               </span>
                               {!firebaseUser && (
@@ -241,25 +242,26 @@ export const Navbar: React.FC = () => {
               id="btn-nav-theme-toggle"
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
               className="rounded-xl p-2 text-stone-400 hover:bg-stone-100 hover:text-stone-800 dark:text-stone-500 dark:hover:bg-stone-850 dark:hover:text-stone-200 transition-colors select-none cursor-pointer border border-transparent hover:border-stone-250/20"
-              title="Toggle Theme"
+              aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
             >
               {theme === 'light' ? <Moon className="h-4.5 w-4.5" /> : <Sun className="h-4.5 w-4.5" />}
             </button>
 
             {/* Profile control or guest Auth Button */}
-            {firebaseUser ? (
+            {(firebaseUser || isDemoMode) ? (
               <div className="relative" ref={profileRef}>
                 {/* Profile Avatar Control */}
                 <button
                   id="btn-nav-profile-trigger"
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center space-x-1.5 py-1.5 px-2 rounded-xl hover:bg-stone-55 dark:hover:bg-stone-850 text-stone-705 dark:text-stone-250 transition-all select-none cursor-pointer border border-transparent hover:border-stone-200 dark:hover:border-stone-800"
+                  className="flex items-center space-x-1.5 py-1.5 px-2 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-250 transition-all select-none cursor-pointer border border-transparent hover:border-stone-200 dark:hover:border-stone-800"
                 >
                   <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-emerald-600 to-forest-600 text-white font-black text-xs flex items-center justify-center border border-forest-100 dark:border-forest-900 shadow-sm">
-                    {getInitials(firebaseUser.displayName || user?.name)}
+                    {getInitials(firebaseUser?.displayName || user?.name)}
                   </div>
                   <span className="hidden sm:inline text-xs font-bold leading-none">
-                    {firebaseUser.displayName?.split(' ')[0] || user?.name?.split(' ')[0] || 'Member'}
+                    {firebaseUser?.displayName?.split(' ')[0] || user?.name?.split(' ')[0] || 'Member'}
                   </span>
                   <ChevronDown className={`h-3 w-3 text-stone-400 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -269,7 +271,7 @@ export const Navbar: React.FC = () => {
                   <div className="absolute right-0 mt-2 w-52 rounded-xl border border-stone-200 bg-white p-2 shadow-xl dark:border-stone-850 dark:bg-stone-900 animate-slide-up z-50">
                     <div className="px-3 py-2 border-b border-stone-100 dark:border-stone-850/80 mb-1">
                       <p className="text-[9px] uppercase font-medium tracking-wider font-mono text-stone-400">Carbon Sentinel</p>
-                      <p className="text-xs font-bold text-stone-800 dark:text-stone-100 truncate">{firebaseUser.email}</p>
+                      <p className="text-xs font-bold text-stone-800 dark:text-stone-100 truncate">{firebaseUser?.email || "sandbox.demo@carboncompass.org"}</p>
                     </div>
 
                     <button
@@ -294,7 +296,7 @@ export const Navbar: React.FC = () => {
                       <span>Account Settings</span>
                     </button>
 
-                    <div className="h-[1px] bg-stone-105 dark:bg-stone-850/80 my-1.5"></div>
+                    <div className="h-[1px] bg-stone-100 dark:bg-stone-850/80 my-1.5"></div>
 
                     <button
                       id="btn-dropdown-signout"
@@ -325,6 +327,8 @@ export const Navbar: React.FC = () => {
               id="btn-nav-mobile-trigger"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="inline-flex items-center justify-center rounded-xl p-2 text-stone-400 hover:bg-stone-100 hover:text-stone-850 dark:text-stone-500 dark:hover:bg-stone-850 lg:hidden cursor-pointer select-none border border-transparent"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -350,7 +354,7 @@ export const Navbar: React.FC = () => {
                 className={`flex w-full items-center space-x-3 rounded-lg px-3 py-2 text-xs font-bold select-none cursor-pointer ${
                   isActive
                     ? 'bg-forest-600 text-white dark:bg-forest-700'
-                    : 'text-stone-605 hover:bg-stone-50 dark:text-stone-300 dark:hover:bg-stone-850'
+                    : 'text-stone-600 hover:bg-stone-50 dark:text-stone-300 dark:hover:bg-stone-850'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -371,14 +375,14 @@ export const Navbar: React.FC = () => {
                 className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-bold select-none cursor-pointer ${
                   isActive
                     ? 'bg-forest-600 text-white dark:bg-forest-700'
-                    : 'text-stone-605 hover:bg-stone-50 dark:text-stone-300 dark:hover:bg-stone-850'
+                    : 'text-stone-600 hover:bg-stone-50 dark:text-stone-300 dark:hover:bg-stone-850'
                 }`}
               >
                 <div className="flex items-center space-x-3">
                   <Icon className="h-4 w-4" />
                   <span>{item.label}</span>
                 </div>
-                {!firebaseUser && (
+                {!(firebaseUser || isDemoMode) && (
                   <Lock className="h-3.5 w-3.5 text-stone-400" />
                 )}
               </button>
@@ -397,21 +401,21 @@ export const Navbar: React.FC = () => {
                 className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-bold select-none cursor-pointer ${
                   isActive
                     ? 'bg-forest-600 text-white dark:bg-forest-700'
-                    : 'text-stone-605 hover:bg-stone-50 dark:text-stone-300 dark:hover:bg-stone-850'
+                    : 'text-stone-600 hover:bg-stone-50 dark:text-stone-300 dark:hover:bg-stone-850'
                 }`}
               >
                 <div className="flex items-center space-x-3">
                   <Icon className="h-4 w-4" />
                   <span>{item.label}</span>
                 </div>
-                {!firebaseUser && (
+                {!(firebaseUser || isDemoMode) && (
                   <Lock className="h-3.5 w-3.5 text-stone-400" />
                 )}
               </button>
             );
           })}
 
-          {firebaseUser && (
+          {(firebaseUser || isDemoMode) && (
             <div className="pt-2 mt-4 border-t border-stone-200 dark:border-stone-800 space-y-1">
               <button
                 id="btn-mobile-nav-settings"

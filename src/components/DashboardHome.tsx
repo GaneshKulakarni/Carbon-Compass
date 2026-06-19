@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { InteractiveGlobe } from './InteractiveGlobe';
+// Lazy-load the Three.js globe to keep initial bundle lean (~400KB deferred)
+const InteractiveGlobe = React.lazy(() => import('./InteractiveGlobe').then(m => ({ default: m.InteractiveGlobe })));
 import { 
   BarChart3, TrendingDown, Flame, Compass, Award, Plus, Trash2, 
   ArrowRight, ShieldCheck, Footprints, AlertTriangle, Lightbulb, 
@@ -164,13 +165,15 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
   const currentActual = Math.max(0, Math.round(baselineMonthly - savedThisMonth + addedThisMonth));
   const progressPercent = Math.min(100, Math.round((currentActual / baselineMonthly) * 100));
 
-  // Category values after saved offsets
-  const activeTransport = Math.max(0, Math.round((footprint?.transportScore || 380) - Math.abs(activityLogs.filter(l => l.category === 'transport' && l.estimatedEmission < 0).reduce((acc, l) => acc + l.estimatedEmission, 0))));
-  const activeFood = Math.max(0, Math.round((footprint?.foodScore || 240) - Math.abs(activityLogs.filter(l => l.category === 'food' && l.estimatedEmission < 0).reduce((acc, l) => acc + l.estimatedEmission, 0))));
-  const activeHome = Math.max(0, Math.round((footprint?.homeScore || 350) - Math.abs(activityLogs.filter(l => l.category === 'home' && l.estimatedEmission < 0).reduce((acc, l) => acc + l.estimatedEmission, 0))));
-  const activeShopping = Math.max(0, Math.round((footprint?.shoppingScore || 180) - Math.abs(activityLogs.filter(l => l.category === 'shopping' && l.estimatedEmission < 0).reduce((acc, l) => acc + l.estimatedEmission, 0))));
-  const activeWaste = Math.max(0, Math.round((footprint?.wasteScore || 80) - Math.abs(activityLogs.filter(l => l.category === 'waste' && l.estimatedEmission < 0).reduce((acc, l) => acc + l.estimatedEmission, 0))));
-
+  // Category values after saved offsets — memoized to prevent redundant
+  // filter/reduce operations from running on every render
+  const { activeTransport, activeFood, activeHome, activeShopping, activeWaste } = React.useMemo(() => ({
+    activeTransport: Math.max(0, Math.round((footprint?.transportScore || 380) - Math.abs(activityLogs.filter(l => l.category === 'transport' && l.estimatedEmission < 0).reduce((acc, l) => acc + l.estimatedEmission, 0)))),
+    activeFood: Math.max(0, Math.round((footprint?.foodScore || 240) - Math.abs(activityLogs.filter(l => l.category === 'food' && l.estimatedEmission < 0).reduce((acc, l) => acc + l.estimatedEmission, 0)))),
+    activeHome: Math.max(0, Math.round((footprint?.homeScore || 350) - Math.abs(activityLogs.filter(l => l.category === 'home' && l.estimatedEmission < 0).reduce((acc, l) => acc + l.estimatedEmission, 0)))),
+    activeShopping: Math.max(0, Math.round((footprint?.shoppingScore || 180) - Math.abs(activityLogs.filter(l => l.category === 'shopping' && l.estimatedEmission < 0).reduce((acc, l) => acc + l.estimatedEmission, 0)))),
+    activeWaste: Math.max(0, Math.round((footprint?.wasteScore || 80) - Math.abs(activityLogs.filter(l => l.category === 'waste' && l.estimatedEmission < 0).reduce((acc, l) => acc + l.estimatedEmission, 0)))),
+  }), [activityLogs, footprint]);
   // Biggest category contributor
   const categories = [
     { name: 'Transport & Travel', val: activeTransport, emoji: '🚗', color: 'bg-amber-500' },
@@ -205,7 +208,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
           </h1>
           <p className="text-xs text-stone-500 dark:text-stone-400 font-mono mt-0.5 flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" />
-            <span>Tracking active footprint for June 2026.</span>
+            <span>Tracking active footprint for {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}.</span>
           </p>
         </div>
 
@@ -325,7 +328,16 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
 
         {/* 3D Planet Vitality Globe Card - takes 2 cols */}
         <div className="md:col-span-2 rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between">
-          <InteractiveGlobe size="sm" />
+          <React.Suspense fallback={
+            <div className="flex items-center justify-center h-40 text-stone-400">
+              <div className="text-center space-y-2">
+                <div className="h-8 w-8 rounded-full border-2 border-forest-300 border-t-forest-600 animate-spin mx-auto" />
+                <p className="text-xs font-mono">Loading Globe...</p>
+              </div>
+            </div>
+          }>
+            <InteractiveGlobe size="sm" />
+          </React.Suspense>
         </div>
 
       </div>
@@ -362,7 +374,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
             {/* Streak Risk Alert or Motivational Line */}
             <div className="mt-4 pt-3.5 border-t border-stone-100 dark:border-stone-800">
               {streakInfo.warning ? (
-                <div className="p-2.5 rounded-lg bg-rose-500/5 border border-rose-500/15 text-[11px] text-rose-600 dark:text-rose-450 flex items-start gap-1.5 leading-relaxed">
+                <div className="p-2.5 rounded-lg bg-rose-500/5 border border-rose-500/15 text-[11px] text-rose-600 dark:text-rose-400 flex items-start gap-1.5 leading-relaxed">
                   <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                   <span>Your active streak expires tonight! Log an action now to protect your progress.</span>
                 </div>
@@ -456,7 +468,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
                 return (
                   <div key={i} className="space-y-1">
                     <div className="flex justify-between text-xs">
-                      <span className={`font-semibold ${item.isUser ? 'text-forest-700 dark:text-forest-405 font-bold' : item.isTarget ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-605 dark:text-stone-300'}`}>
+                      <span className={`font-semibold ${item.isUser ? 'text-forest-700 dark:text-forest-400 font-bold' : item.isTarget ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-600 dark:text-stone-300'}`}>
                         {item.label}
                       </span>
                       <span className="font-mono font-bold text-stone-700 dark:text-stone-300">{item.val} kg CO₂e</span>
@@ -489,7 +501,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
               <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider font-mono">Daily Shock Fact</span>
               <button 
                 onClick={() => setShockIndex(prev => (prev + 1) % DAILY_SHOCKS.length)}
-                className="p-1 rounded hover:bg-amber-100/40 text-stone-405"
+                className="p-1 rounded hover:bg-amber-100/40 text-stone-400"
                 title="Next shock fact"
               >
                 <RefreshCw className="h-3.5 w-3.5 pb-0.5" />
@@ -497,7 +509,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
             </div>
             
             <div className="mt-3.5">
-              <span className="text-[9px] font-bold font-mono tracking-wider text-amber-800 dark:text-amber-305 bg-amber-100/50 dark:bg-amber-950/40 px-2 py-0.5 rounded uppercase">
+              <span className="text-[9px] font-bold font-mono tracking-wider text-amber-800 dark:text-amber-300 bg-amber-100/50 dark:bg-amber-950/40 px-2 py-0.5 rounded uppercase">
                 {DAILY_SHOCKS[shockIndex].badge}
               </span>
               <h4 className="font-display font-extrabold text-sm text-stone-900 dark:text-stone-50 mt-2.5 leading-snug">

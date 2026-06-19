@@ -1,18 +1,25 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+// Firebase config is loaded from the project-level JSON config file.
+// This file is managed by the deployment environment and should NOT be
+// duplicated in TypeScript source code.
+import firebaseAppletConfig from '../../firebase-applet-config.json';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDXoF8s8u4T4hJkez-u0M5RuFPK4bj6Jt8",
-  authDomain: "gentle-forcaster-hskkt.firebaseapp.com",
-  projectId: "gentle-forcaster-hskkt",
-  appId: "1:121566148421:web:59af0ca9468b90827b302c",
-  storageBucket: "gentle-forcaster-hskkt.firebasestorage.app",
-  messagingSenderId: "121566148421"
+  apiKey: firebaseAppletConfig.apiKey,
+  authDomain: firebaseAppletConfig.authDomain,
+  projectId: firebaseAppletConfig.projectId,
+  appId: firebaseAppletConfig.appId,
+  storageBucket: firebaseAppletConfig.storageBucket,
+  messagingSenderId: firebaseAppletConfig.messagingSenderId,
 };
 
 const app = initializeApp(firebaseConfig);
 
-// Connect with custom firestore databaseId from configuration
-export const db = getFirestore(app, "ai-studio-4beed89e-ccef-4f48-a3f1-ab83115fcb5b");
+// Use the custom Firestore database ID from the applet config if present,
+// otherwise fall back to the default database.
+const firestoreDatabaseId = firebaseAppletConfig.firestoreDatabaseId || '(default)';
+
+export const db = getFirestore(app, firestoreDatabaseId);
 export const auth = getAuth(app);

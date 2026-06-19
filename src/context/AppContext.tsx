@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { UserProfile, FootprintProfile, ActivityLog, Goal, Recommendation, MilestoneBadge } from '../types';
 import { calculateBaseline, generateClimatePersona, EMISSION_FACTORS } from '../constants/emissions';
 import { auth, db } from '../lib/firebase';
@@ -10,7 +10,8 @@ import {
   updateProfile,
   User as FirebaseUser,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithRedirect
 } from 'firebase/auth';
 import { 
   doc, 
@@ -233,8 +234,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return unsubscribe;
   }, []);
 
-  // Sync state to cloud
-  const syncDataToCloud = async (userState?: UserProfile | null, logsState?: ActivityLog[], goalsState?: Goal[]) => {
+  // Debounce timer ref for cloud sync — avoids hammering Firestore on rapid state changes
+  const syncDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync only essential user data, logs, and goals to Firestore.
+  // Badges and recommendations are either derivable or session-local.
+  const syncDataToCloud = useCallback(async (
+    userState?: UserProfile | null,
+    logsState?: ActivityLog[],
+    goalsState?: Goal[]
+  ) => {
     const activeU = userState !== undefined ? userState : user;
     const activeLogs = logsState !== undefined ? logsState : activityLogs;
     const activeGoals = goalsState !== undefined ? goalsState : goals;
@@ -249,12 +258,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           goals: activeGoals,
           updatedAt: new Date().toISOString()
         }, { merge: true });
-        console.log("Firestore synced successfully!");
       } catch (e) {
-        console.error("Firestore sync failed: ", e);
+        console.error('[carbon-compass] Firestore sync failed:', e);
       }
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, activityLogs, goals, footprint]);
 
   const signUpEmail = async (email: string, password: string, name: string) => {
     setAuthError(null);
@@ -262,15 +271,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const credential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(credential.user, { displayName: name });
-      
-      setUser(null);
-      setFootprint(null);
-      setActivityLogs([]);
-      setGoals([]);
-      
+      // onAuthStateChanged will fire and handle state clearing
       setActiveTab('onboarding');
-    } catch (err: any) {
-      setAuthError(err.message || 'Failed to sign up');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to sign up';
+      setAuthError(message);
       throw err;
     } finally {
       setAuthLoading(false);
@@ -281,27 +286,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuthError(null);
     setAuthLoading(true);
     try {
-      const credential = await signInWithEmailAndPassword(auth, email, password);
-      
-      // Load from Firestore
-      const userDocRef = doc(db, 'users', credential.user.uid);
-      const snap = await getDoc(userDocRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        if (data.user) {
-          setUser(data.user);
-          if (data.footprint) setFootprint(data.footprint);
-          if (data.activityLogs) setActivityLogs(data.activityLogs);
-          if (data.goals) setGoals(data.goals);
-          setActiveTab('dashboard');
-        } else {
-          setActiveTab('onboarding');
-        }
-      } else {
-        setActiveTab('onboarding');
-      }
-    } catch (err: any) {
-      setAuthError(err.message || 'Failed to sign in');
+      // Sign in only — onAuthStateChanged listener will handle all data loading.
+      // Previously this caused a double Firestore fetch (here + in the listener).
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to sign in';
+      setAuthError(message);
       throw err;
     } finally {
       setAuthLoading(false);
@@ -313,26 +303,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuthLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      const credential = await signInWithPopup(auth, provider);
-      
-      const userDocRef = doc(db, 'users', credential.user.uid);
-      const snap = await getDoc(userDocRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        if (data.user) {
-          setUser(data.user);
-          if (data.footprint) setFootprint(data.footprint);
-          if (data.activityLogs) setActivityLogs(data.activityLogs);
-          if (data.goals) setGoals(data.goals);
-          setActiveTab('dashboard');
-        } else {
-          setActiveTab('onboarding');
-        }
+      // Sign in only — onAuthStateChanged listener will handle all data loading.
+      // Fallback to redirect on mobile or if popup is blocked
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
       } else {
-        setActiveTab('onboarding');
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (popupErr: unknown) {
+          if (popupErr && typeof popupErr === 'object' && 'code' in popupErr && popupErr.code === 'auth/popup-blocked') {
+            await signInWithRedirect(auth, provider);
+          } else {
+            throw popupErr;
+          }
+        }
       }
-    } catch (err: any) {
-      setAuthError(err.message || 'Failed to sign in with Google');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to sign in with Google';
+      setAuthError(message);
       throw err;
     } finally {
       setAuthLoading(false);
@@ -348,9 +337,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setActivityLogs([]);
       setGoals([]);
       setFirebaseUser(null);
+      setIsDemoMode(false);
       setActiveTab('landing');
-    } catch (err: any) {
-      setAuthError(err.message || 'Failed to sign out');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to sign out';
+      setAuthError(message);
     }
   };
 
@@ -372,7 +363,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
-  // Save to local storage when state changes; and sync online too
+  // Persist lightweight preferences (no debounce needed)
+  useEffect(() => {
+    localStorage.setItem('cc_theme', theme);
+    localStorage.setItem('cc_lessons', JSON.stringify(completedLessons));
+  }, [theme, completedLessons]);
+
+  // Apply dark/light class to <html> element — this is the correct target
+  // for Tailwind CSS v3/v4's 'class' dark mode strategy.
+  // Using a wrapper <div> was the original approach but can cause layout edge cases.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [theme]);
+
+  // Persist carbon data to localStorage
   useEffect(() => {
     if (user) localStorage.setItem('cc_user', JSON.stringify(user));
     if (footprint) localStorage.setItem('cc_footprint', JSON.stringify(footprint));
@@ -380,13 +389,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('cc_goals', JSON.stringify(goals));
     localStorage.setItem('cc_recs', JSON.stringify(recommendations));
     localStorage.setItem('cc_badges', JSON.stringify(badges));
-    localStorage.setItem('cc_theme', theme);
-    localStorage.setItem('cc_lessons', JSON.stringify(completedLessons));
+  }, [user, footprint, activityLogs, goals, recommendations, badges]);
 
-    if (firebaseUser) {
+  // Debounced Firestore cloud sync — fires 800ms after last change
+  // Keeps firebaseUser OUT of deps to avoid syncing on every auth event
+  useEffect(() => {
+    if (!firebaseUser || !user) return;
+    if (syncDebounceRef.current) clearTimeout(syncDebounceRef.current);
+    syncDebounceRef.current = setTimeout(() => {
       syncDataToCloud(user, activityLogs, goals);
-    }
-  }, [user, footprint, activityLogs, goals, recommendations, badges, theme, completedLessons, firebaseUser]);
+    }, 800);
+    return () => {
+      if (syncDebounceRef.current) clearTimeout(syncDebounceRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, activityLogs, goals]);
 
   const completeLesson = (lessonId: string) => {
     setCompletedLessons(prev => {
@@ -860,11 +877,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       loadDemoMode,
       setGoals
     }}>
-      <div className={theme}>
-        <div className="bg-stone-50 min-h-screen text-stone-900 transition-colors duration-300 dark:bg-stone-950 dark:text-stone-50">
-          {children}
-        </div>
-      </div>
+      {children}
     </AppContext.Provider>
   );
 };

@@ -6,21 +6,40 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// Startup validation — fail fast with a clear message if the key is missing
+if (!process.env.GEMINI_API_KEY) {
+  console.warn(
+    "[carbon-compass] WARNING: GEMINI_API_KEY is not set. " +
+    "Gemini AI endpoints (/api/gemini/*) will return errors. " +
+    "Set the key in your .env file or deployment environment."
+  );
+}
+
 const app = express();
 const PORT = 3000;
 
 // Maximum payload size for handling base64 uploaded image files
 app.use(express.json({ limit: '10mb' }));
 
-// Init Google GenAI client (User-Agent header required for telemetry)
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
-  }
+// Basic security headers
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  next();
 });
+
+// Helper to get Gemini client dynamically to avoid needing a server restart if .env changes
+const getGenAIClient = () => {
+  dotenv.config();
+  return new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY ?? '',
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      }
+    }
+  });
+};
 
 // Real-time analysis of uploaded ecological scars using multimodal Gemini 3.5 Flash
 app.post("/api/gemini/analyze-scar", async (req, res) => {
@@ -41,7 +60,7 @@ app.post("/api/gemini/analyze-scar", async (req, res) => {
       }
     };
 
-    const response = await ai.models.generateContent({
+    const response = await getGenAIClient().models.generateContent({
       model: "gemini-3.5-flash",
       contents: { 
         parts: [
@@ -80,9 +99,10 @@ app.post("/api/gemini/analyze-scar", async (req, res) => {
     const data = JSON.parse(cleanedText);
 
     res.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Gemini analysis error:", error);
-    res.status(500).json({ error: error.message || "Failed to analyze ecological scar" });
+    const errMsg = error instanceof Error ? error.message : "Failed to analyze ecological scar";
+    res.status(500).json({ error: errMsg });
   }
 });
 
@@ -90,9 +110,16 @@ app.post("/api/gemini/analyze-scar", async (req, res) => {
 app.post("/api/gemini/generate-meme", async (req, res) => {
   try {
     const { topic } = req.body;
-    const requestedTopic = topic || "general plastic pollution or energy waste";
+    // Sanitize input: strip non-printable/special chars, enforce max length
+    // to prevent prompt injection attacks
+    const rawTopic = typeof topic === 'string' ? topic : '';
+    const sanitizedTopic = rawTopic
+      .replace(/[<>{}\[\]\\"';]/g, '') // strip injection-prone chars
+      .trim()
+      .slice(0, 200); // hard cap at 200 chars
+    const requestedTopic = sanitizedTopic || "general plastic pollution or energy waste";
 
-    const response = await ai.models.generateContent({
+    const response = await getGenAIClient().models.generateContent({
       model: "gemini-3.5-flash",
       contents: `Generate a funny, viral eco-sustainability meme about "${requestedTopic}". The meme must highlight human hypocrisy or carbon ironies in a funny, lighthearted but deeply educational way, and then provide a powerful teaching paragraph. Use one of the classic meme templates specified in the templateType schema. Build corresponding values for that template type.`,
       config: {
@@ -155,9 +182,10 @@ app.post("/api/gemini/generate-meme", async (req, res) => {
     }
 
     res.json(JSON.parse(resultText.trim()));
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Gemini Meme generation error:", error);
-    res.status(500).json({ error: error.message || "Failed to generate eco meme" });
+    const errMsg = error instanceof Error ? error.message : "Failed to generate eco meme";
+    res.status(500).json({ error: errMsg });
   }
 });
 

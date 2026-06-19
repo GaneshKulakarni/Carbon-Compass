@@ -86,11 +86,17 @@ To launch Carbon Compass locally:
     ```bash
     npm install
     ```
-3.  Boot dev server:
+3.  Set up environment variables:
+    - Copy `.env.example` to a new file named `.env` in the project root:
+      ```bash
+      cp .env.example .env
+      ```
+    - Open `.env` and set your `GEMINI_API_KEY` (e.g., from Google AI Studio). This enables server-side Gemini AI features (Meme Center and Image Upload Scan).
+4.  Boot dev server:
     ```bash
     npm run dev
     ```
-4.  Compile for production:
+5.  Compile for production:
     ```bash
     npm run build
     ```

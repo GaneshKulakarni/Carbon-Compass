@@ -158,7 +158,7 @@ ${goals.length > 0 ? goals.map(g => `- [${g.progress}/${g.targetValue} Days Done
             <div className="rounded-2xl border border-stone-200 bg-white p-5 dark:border-stone-850 dark:bg-stone-900">
               <span className="text-[10px] text-stone-400 font-bold uppercase font-mono tracking-wider">Weekly Emission Actual</span>
               <div className="mt-2 flex items-baseline space-x-1">
-                <span className="text-3.5xl font-display font-extrabold text-stone-905 dark:text-white">
+                <span className="text-3.5xl font-display font-extrabold text-stone-900 dark:text-white">
                   {actualWeeklyEmission}
                 </span>
                 <span className="text-xs font-semibold text-stone-500">kg CO₂e</span>
@@ -234,7 +234,7 @@ ${goals.length > 0 ? goals.map(g => `- [${g.progress}/${g.targetValue} Days Done
           <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-xs dark:border-stone-850 dark:bg-stone-900 space-y-4" id="habit-success-summary-card">
             <h3 className="font-display font-bold text-stone-900 dark:text-stone-50 text-base mb-1.5 flex items-center justify-between">
               <span>Habit Success Summary</span>
-              <span className="text-xs font-mono font-bold bg-amber-50 text-amber-801 dark:bg-amber-950/40 dark:text-amber-450 px-2 py-0.5 rounded">
+              <span className="text-xs font-mono font-bold bg-amber-500/10 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 px-2 py-0.5 rounded">
                 {goals.length} Promises Active
               </span>
             </h3>
@@ -251,7 +251,7 @@ ${goals.length > 0 ? goals.map(g => `- [${g.progress}/${g.targetValue} Days Done
                       <span className="text-[10px] font-bold font-mono tracking-wider text-forest-700 dark:text-emerald-400 capitalize bg-forest-50 dark:bg-forest-950/30 px-1.5 py-0.2 rounded font-semibold">
                         {goal.category}
                       </span>
-                      <h6 className="font-bold text-stone-855 dark:text-stone-100 flex items-center gap-1.5 pt-0.5">
+                      <h6 className="font-bold text-stone-850 dark:text-stone-100 flex items-center gap-1.5 pt-0.5">
                         <span>{goal.title}</span>
                       </h6>
                       <div className="flex gap-2 text-[10.5px] text-stone-400 mt-0.5 font-sans">
@@ -354,7 +354,7 @@ ${goals.length > 0 ? goals.map(g => `- [${g.progress}/${g.targetValue} Days Done
               </span>
             </div>
 
-            <p className="text-[11px] text-stone-500 leading-relaxed dark:text-stone-450 font-sans">
+            <p className="text-[11px] text-stone-500 leading-relaxed dark:text-stone-400 font-sans">
               Export your verified climate action metrics directly. Choose a real sharing method below:
             </p>
 

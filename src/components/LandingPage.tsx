@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useApp } from '../context/AppContext';
-import { InteractiveGlobe } from './InteractiveGlobe';
+// Lazy-load the Three.js globe — defers the ~400KB Three.js bundle until needed
+const InteractiveGlobe = React.lazy(() => import('./InteractiveGlobe').then(m => ({ default: m.InteractiveGlobe })));
 import { 
   Compass, Leaf, ArrowRight, Play, CheckCircle2, ShieldCheck, 
   Zap, Heart, TrendingDown, RefreshCw, BarChart, ChevronDown, 
@@ -131,8 +132,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
       setUserTragedy(newTragedy);
       // Automatically switch slide view to this newly uploaded scar as index 0
       setActiveSlide(0);
-    } catch (err: any) {
-      setUploadError(err.message || "Could not connect to Gemini server. Please check your network or key.");
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "Could not connect to Gemini server. Please check your network or key.";
+      setUploadError(errMsg);
     } finally {
       setIsScanning(false);
     }
@@ -315,7 +317,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
       <header className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-12 pb-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-stone-200 dark:border-stone-850 pb-8">
           <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 rounded-full bg-orange-100/80 dark:bg-orange-950/30 px-3 py-1 text-[11px] font-mono font-bold tracking-wide text-orange-850 dark:text-orange-450 border border-orange-200/40">
+            <div className="inline-flex items-center space-x-2 rounded-full bg-orange-100/80 dark:bg-orange-950/30 px-3 py-1 text-[11px] font-mono font-bold tracking-wide text-orange-850 dark:text-orange-400 border border-orange-200/40">
               <AlertTriangle className="h-3.5 w-3.5 animate-pulse text-orange-600 dark:text-orange-400" />
               <span>THE PLANETARY EXHIBITION & RESOLUTION SUITE</span>
             </div>
@@ -470,7 +472,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                           onClick={() => applyOfflineCurationTemplate('urban')}
                           className="px-3 py-2 bg-white dark:bg-stone-900 hover:bg-stone-50 border border-stone-200 dark:border-stone-850 hover:border-orange-500 rounded-xl text-left text-[11px] font-bold text-stone-800 dark:text-stone-200 cursor-pointer transition flex items-center gap-1.5"
                         >
-                          <span className="h-2 w-2 rounded-full bg-red-505 shrink-0" />
+                          <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
                           <span>Urban Heat Island</span>
                         </button>
                       </div>
@@ -551,7 +553,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                 onClick={() => setActiveViewMode('healing')}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-xs font-bold rounded-xl transition cursor-pointer ${
                   activeViewMode === 'healing' 
-                    ? 'bg-white text-stone-905 shadow-md dark:bg-stone-800 dark:text-white' 
+                    ? 'bg-white text-stone-900 shadow-md dark:bg-stone-800 dark:text-white' 
                     : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
                 }`}
                 id="btn-tab-exhibit-healing"
@@ -638,6 +640,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                           }}
                           className="h-10 w-10 rounded-full bg-stone-950/85 backdrop-blur border border-stone-800 text-white flex items-center justify-center hover:bg-stone-900 select-none cursor-pointer"
                           id="btn-slide-prev"
+                          aria-label="Previous slide"
                         >
                           <ChevronLeft className="h-5 w-5" />
                         </button>
@@ -651,6 +654,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                           }}
                           className="h-10 w-10 rounded-full bg-stone-950/85 backdrop-blur border border-stone-800 text-white flex items-center justify-center hover:bg-stone-900 select-none cursor-pointer"
                           id="btn-slide-next"
+                          aria-label="Next slide"
                         >
                           <ChevronRight className="h-5 w-5" />
                         </button>
@@ -673,7 +677,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                     <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed font-sans">
                       {activeTragediesList[activeSlide]?.description}
                     </p>
-                    <p className="text-xs text-stone-500 dark:text-stone-450 italic leading-relaxed pl-3 border-l-2 border-orange-500/50">
+                    <p className="text-xs text-stone-500 dark:text-stone-400 italic leading-relaxed pl-3 border-l-2 border-orange-500/50">
                       "{activeTragediesList[activeSlide]?.significance}"
                     </p>
 
@@ -702,7 +706,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
               /* VIEW 2: The dynamic 3D Active Globe visual representational context */
               <div className="space-y-4 animate-slide-up" id="hologram-eco-healing">
                 <div className="rounded-2xl border border-stone-200 dark:border-stone-800/80 bg-stone-950 relative overflow-hidden p-1.5">
-                  <InteractiveGlobe showOnlyGlobe={true} size="md" />
+                  <Suspense fallback={
+                    <div className="flex items-center justify-center h-48 text-stone-500">
+                      <div className="text-center space-y-2">
+                        <div className="h-8 w-8 rounded-full border-2 border-stone-600 border-t-emerald-400 animate-spin mx-auto" />
+                        <p className="text-[10px] font-mono tracking-widest uppercase">Initializing Globe...</p>
+                      </div>
+                    </div>
+                  }>
+                    <InteractiveGlobe showOnlyGlobe={true} size="md" />
+                  </Suspense>
                   
                   {/* Subtle technical branding overlay */}
                   <div className="absolute top-4 left-4 pointer-events-none flex items-center space-x-1.5 bg-stone-950/90 backdrop-blur-md border border-stone-800 px-3 py-1 rounded-full text-[9px] font-mono font-bold tracking-wide uppercase text-stone-200">
@@ -730,7 +743,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                         </span>
                         <button
                           onClick={() => setShowGlobeHint(false)}
-                          className="text-stone-400 hover:text-white font-mono text-[10px] leading-none cursor-pointer px-1.5 py-0.5 rounded bg-stone-805 hover:bg-stone-750"
+                          className="text-stone-400 hover:text-white font-mono text-[10px] leading-none cursor-pointer px-1.5 py-0.5 rounded bg-stone-800 hover:bg-stone-750"
                         >
                           ✕
                         </button>
@@ -787,7 +800,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
               target="_blank"
               rel="noreferrer"
               referrerPolicy="no-referrer"
-              className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200/60 dark:border-stone-855 hover:border-emerald-600 rounded-2xl flex flex-col justify-between text-left group transition shadow-xs"
+              className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850 hover:border-emerald-600 rounded-2xl flex flex-col justify-between text-left group transition shadow-xs"
               title="Visit Project Drawdown (opens in a new tab)"
             >
               <div>
@@ -798,7 +811,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                   Project Drawdown
                 </span>
               </div>
-              <p className="text-[10px] text-stone-400 dark:text-stone-505 leading-tight mt-2.5 font-sans">
+              <p className="text-[10px] text-stone-400 dark:text-stone-400 leading-tight mt-2.5 font-sans">
                 The world's premier scientific climate solutions directory.
               </p>
             </a>
@@ -808,7 +821,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
               target="_blank"
               rel="noreferrer"
               referrerPolicy="no-referrer"
-              className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200/60 dark:border-stone-855 hover:border-emerald-600 rounded-2xl flex flex-col justify-between text-left group transition shadow-xs"
+              className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850 hover:border-emerald-600 rounded-2xl flex flex-col justify-between text-left group transition shadow-xs"
               title="Visit WWF (opens in a new tab)"
             >
               <div>
@@ -819,7 +832,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                   World Wildlife Fund
                 </span>
               </div>
-              <p className="text-[10px] text-stone-400 dark:text-stone-505 leading-tight mt-2.5 font-sans">
+              <p className="text-[10px] text-stone-400 dark:text-stone-400 leading-tight mt-2.5 font-sans">
                 Global guardians defending wildlife preservation and bio-sanctuarism.
               </p>
             </a>
@@ -829,7 +842,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
               target="_blank"
               rel="noreferrer"
               referrerPolicy="no-referrer"
-              className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200/60 dark:border-stone-855 hover:border-emerald-600 rounded-2xl flex flex-col justify-between text-left group transition shadow-xs"
+              className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850 hover:border-emerald-600 rounded-2xl flex flex-col justify-between text-left group transition shadow-xs"
               title="Visit World Resources Institute (opens in a new tab)"
             >
               <div>
@@ -840,7 +853,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                   World Resources Institute
                 </span>
               </div>
-              <p className="text-[10px] text-stone-400 dark:text-stone-505 leading-tight mt-2.5 font-sans">
+              <p className="text-[10px] text-stone-400 dark:text-stone-400 leading-tight mt-2.5 font-sans">
                 A massive global research system turning resources data into action.
               </p>
             </a>
@@ -850,7 +863,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
               target="_blank"
               rel="noreferrer"
               referrerPolicy="no-referrer"
-              className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200/60 dark:border-stone-855 hover:border-emerald-600 rounded-2xl flex flex-col justify-between text-left group transition shadow-xs"
+              className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850 hover:border-emerald-600 rounded-2xl flex flex-col justify-between text-left group transition shadow-xs"
               title="Visit Earthday Network (opens in a new tab)"
             >
               <div>
@@ -861,7 +874,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                   Earthday Network
                 </span>
               </div>
-              <p className="text-[10px] text-stone-400 dark:text-stone-505 leading-tight mt-2.5 font-sans">
+              <p className="text-[10px] text-stone-400 dark:text-stone-400 leading-tight mt-2.5 font-sans">
                 The massive civic force organizing active anti-plastic campaigns for decades.
               </p>
             </a>
@@ -871,7 +884,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
               target="_blank"
               rel="noreferrer"
               referrerPolicy="no-referrer"
-              className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200/60 dark:border-stone-855 hover:border-emerald-600 rounded-2xl flex flex-col justify-between text-left group transition shadow-xs"
+              className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850 hover:border-emerald-600 rounded-2xl flex flex-col justify-between text-left group transition shadow-xs"
               title="Visit UNFCCC (opens in a new tab)"
             >
               <div>
@@ -882,7 +895,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                   UN Climate Change
                 </span>
               </div>
-              <p className="text-[10px] text-stone-400 dark:text-stone-505 leading-tight mt-2.5 font-sans">
+              <p className="text-[10px] text-stone-400 dark:text-stone-400 leading-tight mt-2.5 font-sans">
                 The international regulatory core driving global emissions standards.
               </p>
             </a>
@@ -906,7 +919,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
           </div>
 
           <div className="space-y-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-orange-705 dark:bg-orange-950/40 dark:text-orange-400 font-mono font-bold text-sm shadow-xs">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400 font-mono font-bold text-sm shadow-xs">
               02
             </div>
             <h3 className="text-lg font-bold text-stone-900 dark:text-stone-50 font-display">Test Dynamic Scenarios</h3>
@@ -916,7 +929,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
           </div>
 
           <div className="space-y-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100 text-indigo-705 dark:bg-indigo-950/40 dark:text-indigo-400 font-mono font-bold text-sm shadow-xs">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 font-mono font-bold text-sm shadow-xs">
               03
             </div>
             <h3 className="text-lg font-bold text-stone-900 dark:text-stone-50 font-display">Log Habit Receipts</h3>

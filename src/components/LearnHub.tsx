@@ -193,7 +193,7 @@ export const LearnHub: React.FC = () => {
           
           {/* Card: What is my carbon footprint anyway? */}
           <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900 space-y-3">
-            <h3 className="font-display font-semibold text-stone-905 dark:text-stone-50 text-base flex items-center gap-1.5">
+            <h3 className="font-display font-semibold text-stone-900 dark:text-stone-50 text-base flex items-center gap-1.5">
               <BookOpen className="h-4.5 w-4.5 text-forest-600" />
               <span>What is a Carbon Footprint?</span>
             </h3>
@@ -219,7 +219,7 @@ export const LearnHub: React.FC = () => {
                     <div className="flex justify-between items-start">
                       <span className="text-xl leading-none">{item.emoji}</span>
                       {checked && (
-                        <span className="text-[9px] uppercase font-mono text-emerald-600 dark:text-emerald-450 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded font-bold flex items-center gap-1">
+                        <span className="text-[9px] uppercase font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded font-bold flex items-center gap-1">
                           <Check className="h-2.5 w-2.5" /> Read
                         </span>
                       )}
@@ -227,7 +227,7 @@ export const LearnHub: React.FC = () => {
                     <h4 className="font-display font-bold text-stone-900 dark:text-stone-50 text-sm mt-3">
                       {item.title}
                     </h4>
-                    <p className="text-[11.5px] text-stone-505 dark:text-stone-405 leading-relaxed mt-2 font-sans">
+                    <p className="text-[11.5px] text-stone-700 dark:text-stone-300 leading-relaxed mt-2 font-sans">
                       {item.desc}
                     </p>
                   </div>
@@ -299,13 +299,13 @@ export const LearnHub: React.FC = () => {
                         {/* Myth popularity statistics */}
                         <div className="p-2.5 rounded-lg bg-stone-50 dark:bg-stone-950/40 border border-stone-100 dark:border-stone-850 space-y-1.5">
                           <span className="text-[9px] uppercase font-mono text-stone-400 font-bold block">Community Statistics</span>
-                          <div className="flex justify-between text-[10px] font-mono text-stone-505">
+                          <div className="flex justify-between text-[10px] font-mono text-stone-500 dark:text-stone-400">
                             <span>Believed this myth initially:</span>
                             <span className="font-bold text-stone-800 dark:text-stone-300">{myth.believedPercent}%</span>
                           </div>
-                          <div className="flex justify-between text-[10px] font-mono text-stone-505">
+                          <div className="flex justify-between text-[10px] font-mono text-stone-500 dark:text-stone-400">
                             <span>Answered correct first try:</span>
-                            <span className="font-bold text-emerald-600 dark:text-emerald-450">{myth.answeredCorrectPercent}%</span>
+                            <span className="font-bold text-emerald-600 dark:text-emerald-400">{myth.answeredCorrectPercent}%</span>
                           </div>
                         </div>
 
@@ -313,7 +313,7 @@ export const LearnHub: React.FC = () => {
                         <div className="pt-3 border-t border-stone-100 dark:border-stone-800 space-y-2">
                           <div className="flex items-center gap-1">
                             <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                            <span className="text-[10px] font-bold font-mono text-stone-405 uppercase">Test My Knowledge Puzzle:</span>
+                            <span className="text-[10px] font-bold font-mono text-stone-500 dark:text-stone-400 uppercase">Test My Knowledge Puzzle:</span>
                           </div>
                           <p className="text-[11px] font-bold text-stone-800 dark:text-stone-200 leading-tight">
                             {myth.quiz.q}
@@ -327,7 +327,15 @@ export const LearnHub: React.FC = () => {
                                   key={optIdx}
                                   disabled={mythCompleted}
                                   onClick={() => handleQuizSelect(myth.id, optIdx)}
-                                  className={`w-full p-2.5 rounded-lg text-left text-[11px] font-semibold flex items-center justify-between border transition-all ${mythCompleted && optIdx === myth.quiz.correctIndex ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/60' : isSelected ? 'bg-forest-50 border-forest-500 text-forest-700 dark:bg-stone-850 dark:border-forest-600 dark:text-stone-200' : 'bg-stone-50 border-stone-150 text-stone-700 dark:bg-stone-950 dark:border-stone-800 dark:text-stone-400 hover:bg-stone-100/50'}`}
+                                  className={`w-full p-2.5 rounded-lg text-left text-[11px] font-semibold flex items-center justify-between border transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-forest-500 disabled:cursor-not-allowed ${
+                                    mythCompleted && optIdx === myth.quiz.correctIndex 
+                                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/60 font-bold' 
+                                      : isSelected 
+                                        ? 'bg-forest-50 border-forest-500 text-forest-700 dark:bg-stone-800 dark:border-forest-600 dark:text-stone-100' 
+                                        : 'bg-stone-50/50 border-stone-200 text-stone-700 dark:bg-stone-950/40 dark:border-stone-800 dark:text-stone-300 hover:bg-stone-100/50 dark:hover:bg-stone-850/50'
+                                  } ${
+                                    mythCompleted && optIdx !== myth.quiz.correctIndex ? 'opacity-40 text-stone-400 dark:text-stone-600 bg-stone-100/10 dark:bg-stone-950/10' : ''
+                                  }`}
                                 >
                                   <span>{option}</span>
                                   {mythCompleted && optIdx === myth.quiz.correctIndex && (
@@ -359,7 +367,7 @@ export const LearnHub: React.FC = () => {
                           )}
 
                           {mythCompleted && (
-                            <p className="text-[10px] font-mono text-emerald-600 dark:text-emerald-450 font-bold flex items-center gap-1 pt-1.5">
+                            <p className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1 pt-1.5">
                               <CheckCircle className="h-3.5 w-3.5" />
                               <span>Verified correct! +10 KP awarded to profile.</span>
                             </p>

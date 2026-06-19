@@ -7,7 +7,7 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onOpenMethodology }) => {
   return (
-    <footer className="border-t border-stone-200/60 bg-stone-100/40 text-stone-600 dark:border-stone-800/40 dark:bg-stone-950/60 dark:text-stone-400 transition-colors duration-300">
+    <footer className="border-t border-stone-200/60 bg-stone-100 text-stone-600 dark:border-stone-800/40 dark:bg-stone-900 dark:text-stone-400 transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
           

@@ -141,7 +141,7 @@ export const WhatIfSimulator: React.FC = () => {
             <h3 className="text-base font-display font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5 pt-1">
               <span>Dynamic Climate Damage Index</span>
             </h3>
-            <p className="text-xs text-stone-505 dark:text-stone-355 leading-relaxed font-sans pr-4">
+            <p className="text-xs text-stone-500 dark:text-stone-300 leading-relaxed font-sans pr-4">
               According to current climate-economics guidelines (e.g. EPA targets), each <strong>1 kg of CO₂e</strong> released causes approximately <strong>$0.19 USD</strong> of global ecological damage (representing food system crop failures, severe flooding, storm cleanups, and public health costs).
             </p>
           </div>
@@ -153,7 +153,7 @@ export const WhatIfSimulator: React.FC = () => {
               <span className="text-[9px] text-stone-400 block font-mono">/ month</span>
             </div>
             <div>
-              <span className="text-[9px] text-rose-450 font-mono block uppercase">Strategy Damage</span>
+              <span className="text-[9px] text-rose-400 font-mono block uppercase">Strategy Damage</span>
               <span className="text-sm font-extrabold text-rose-600 dark:text-rose-400 font-mono">${(projectedFootprint * 0.19).toFixed(2)}</span>
               <span className="text-[9px] text-stone-400 block font-mono">/ month</span>
             </div>
@@ -298,8 +298,8 @@ export const WhatIfSimulator: React.FC = () => {
 
         {/* Enhanced Future Impact View Card */}
         <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900" id="future-impact-trajectories">
-          <span className="text-xs font-bold text-indigo-505 dark:text-indigo-400 uppercase tracking-wider font-mono">Simulated Long-term Outlook</span>
-          <h3 className="font-display font-bold text-stone-900 dark:text-stone-105 text-base mb-1.5 mt-1 flex items-center gap-1">
+          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider font-mono">Simulated Long-term Outlook</span>
+          <h3 className="font-display font-bold text-stone-900 dark:text-stone-100 text-base mb-1.5 mt-1 flex items-center gap-1">
             <span>10-Year Decarbonization Outlook</span>
           </h3>
           <p className="text-xs text-stone-400 leading-relaxed mb-4 font-sans">
@@ -318,7 +318,7 @@ export const WhatIfSimulator: React.FC = () => {
                   <span className="text-[10px] text-stone-400 block font-sans">Carbon released over 12 months</span>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-xs font-semibold text-stone-403 line-through block font-mono">{(baselineMonthly * 12).toLocaleString()} kg</span>
+                  <span className="text-xs font-semibold text-stone-400 line-through block font-mono">{(baselineMonthly * 12).toLocaleString()} kg</span>
                   <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">{(projectedFootprint * 12).toLocaleString()} kg</span>
                 </div>
               </div>
@@ -330,7 +330,7 @@ export const WhatIfSimulator: React.FC = () => {
                   <span className="text-[10px] text-stone-400 block font-sans">Accumulated strategy weight</span>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-xs font-semibold text-stone-403 line-through block font-mono">{(baselineMonthly * 12 * 5).toLocaleString()} kg</span>
+                  <span className="text-xs font-semibold text-stone-400 line-through block font-mono">{(baselineMonthly * 12 * 5).toLocaleString()} kg</span>
                   <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">{(projectedFootprint * 12 * 5).toLocaleString()} kg</span>
                 </div>
               </div>
@@ -342,8 +342,8 @@ export const WhatIfSimulator: React.FC = () => {
                   <span className="text-[10px] text-stone-400 block font-sans">Decade of active carbon savings</span>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-xs font-semibold text-stone-403 line-through block font-mono">{(baselineMonthly * 12 * 10).toLocaleString()} kg</span>
-                  <span className="text-sm font-black text-teal-650 dark:text-teal-400 font-mono">{(projectedFootprint * 12 * 10).toLocaleString()} kg</span>
+                  <span className="text-xs font-semibold text-stone-400 line-through block font-mono">{(baselineMonthly * 12 * 10).toLocaleString()} kg</span>
+                  <span className="text-sm font-black text-teal-600 dark:text-teal-400 font-mono">{(projectedFootprint * 12 * 10).toLocaleString()} kg</span>
                 </div>
               </div>
 
@@ -353,8 +353,8 @@ export const WhatIfSimulator: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               
               {/* Mature trees forest required to offset */}
-              <div className="bg-emerald-500/5 p-3 rounded-xl border border-emerald-555/10 text-center">
-                <span className="text-[9px] text-stone-405 font-mono block uppercase">Trees Required (10 Yr)</span>
+              <div className="bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10 text-center">
+                <span className="text-[9px] text-stone-400 font-mono block uppercase">Trees Required (10 Yr)</span>
                 <span className="text-base font-black text-emerald-600 dark:text-emerald-400 font-mono leading-none block my-1">
                   {Math.round((projectedFootprint * 12 * 10) / 21)}
                 </span>
@@ -362,8 +362,8 @@ export const WhatIfSimulator: React.FC = () => {
               </div>
 
               {/* Arctic ice sheet conserved */}
-              <div className="bg-sky-500/5 p-3 rounded-xl border border-sky-555/10 text-center">
-                <span className="text-[9px] text-stone-405 font-mono block uppercase">Polar Sea Ice Saved</span>
+              <div className="bg-sky-500/5 p-3 rounded-xl border border-sky-500/10 text-center">
+                <span className="text-[9px] text-stone-400 font-mono block uppercase">Polar Sea Ice Saved</span>
                 <span className="text-base font-black text-sky-600 dark:text-sky-400 font-mono leading-none block my-1 animate-pulse">
                   {Number(((totalSavingsProjected * 12 * 10) / 1000 * 3).toFixed(1))} m²
                 </span>

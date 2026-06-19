@@ -13,6 +13,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onSuccessTab = 'dashboard' }
     signInWithGoogle,
     authError, 
     authLoading,
+    loadDemoMode,
   } = useApp();
 
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
@@ -29,6 +30,12 @@ export const AuthView: React.FC<AuthViewProps> = ({ onSuccessTab = 'dashboard' }
     
     if (!authEmail.trim() || !authPassword.trim()) {
       setLocalError('Please fill out all required fields.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(authEmail.trim())) {
+      setLocalError('Please enter a valid email address (e.g. you@domain.com).');
       return;
     }
 
@@ -69,7 +76,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onSuccessTab = 'dashboard' }
           <h2 className="font-display font-bold text-2xl tracking-tight text-stone-900 dark:text-stone-50">
             {authMode === 'login' ? 'Welcome Back' : 'Create Your Account'}
           </h2>
-          <p className="text-xs text-stone-450 max-w-xs mx-auto leading-relaxed">
+          <p className="text-xs text-stone-400 max-w-xs mx-auto leading-relaxed">
             {authMode === 'login' 
               ? 'Log in to securely restore and synchronize your carbon dashboard, habits, and daily trackers.' 
               : 'Register to unlock your personal carbon footprint ledger, community hubs, and premium AI features.'}
@@ -77,7 +84,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onSuccessTab = 'dashboard' }
         </div>
 
         {/* Tab switcher */}
-        <div className="flex bg-stone-100 p-1 rounded-xl mb-6 dark:bg-stone-955 border border-stone-200/40 dark:border-stone-850/50">
+        <div className="flex bg-stone-100 p-1 rounded-xl mb-6 dark:bg-stone-900 border border-stone-200/40 dark:border-stone-850/50">
           <button 
             id="btn-gate-tab-login"
             type="button"
@@ -99,7 +106,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onSuccessTab = 'dashboard' }
         {/* Errors Block */}
         {(localError || authError) && (
           <div className="mb-4 space-y-3">
-            <div className="p-4 rounded-xl bg-rose-50 border border-rose-150/60 dark:bg-rose-955/20 dark:border-rose-900/30 text-xs text-rose-800 dark:text-rose-350 font-semibold animate-shake flex flex-col gap-2">
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-150/60 dark:bg-rose-900/10 dark:border-rose-900/30 text-xs text-rose-800 dark:text-rose-350 font-semibold animate-shake flex flex-col gap-2">
               <span className="font-bold flex items-center gap-1">
                 <span>⚠️</span>
                 <span>{localError || authError}</span>
@@ -227,6 +234,17 @@ export const AuthView: React.FC<AuthViewProps> = ({ onSuccessTab = 'dashboard' }
               <span>Continue with Google</span>
             </>
           )}
+        </button>
+
+        {/* Try Offline Sandbox Button */}
+        <button
+          id="btn-gate-demo-signin"
+          type="button"
+          onClick={loadDemoMode}
+          className="w-full mt-3 py-3 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/10 hover:bg-emerald-50/20 text-emerald-800 font-bold text-xs shadow-sm cursor-pointer transition-all text-center flex items-center justify-center gap-2 select-none dark:border-emerald-800/50 dark:bg-emerald-950/20 dark:text-emerald-300 dark:hover:bg-emerald-950/40"
+        >
+          <Smile className="h-4 w-4 text-emerald-600 dark:text-emerald-450" />
+          <span>Try Offline Sandbox (Demo Mode)</span>
         </button>
 
         {/* Feature Highlights beneath */}

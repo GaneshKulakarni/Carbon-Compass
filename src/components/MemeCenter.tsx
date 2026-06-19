@@ -112,9 +112,10 @@ export const MemeCenter: React.FC = () => {
       } else {
         throw new Error('Received unformatted payload.');
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      setErrorMsg(e.message || 'Failed to generate meme. Try again!');
+      const errMsg = e instanceof Error ? e.message : 'Failed to generate meme. Try again!';
+      setErrorMsg(errMsg);
     } finally {
       setLoading(false);
     }
@@ -157,9 +158,9 @@ export const MemeCenter: React.FC = () => {
             <div className="grid grid-cols-12 md:min-h-[140px]">
               <div className="col-span-4 bg-emerald-500/15 dark:bg-emerald-950/30 flex flex-col items-center justify-center p-3 text-center border-r border-stone-200/50 dark:border-stone-850 text-emerald-600">
                 <span className="text-4xl font-black mb-1 select-none">👈🤩</span>
-                <span className="text-[10px] uppercase tracking-wider font-extrabold text-emerald-600 dark:text-emerald-450">YES PLEASE</span>
+                <span className="text-[10px] uppercase tracking-wider font-extrabold text-emerald-600 dark:text-emerald-400">YES PLEASE</span>
               </div>
-              <div className="col-span-8 p-5 flex items-center bg-emerald-50/20 dark:bg-emerald-955/20">
+              <div className="col-span-8 p-5 flex items-center bg-emerald-50/20 dark:bg-emerald-950/20">
                 <p className="text-xs md:text-sm font-extrabold text-emerald-800 dark:text-emerald-350 leading-relaxed">
                   {activeMeme.drakeAcceptText || activeMeme.bottomCaption}
                 </p>
@@ -186,7 +187,7 @@ export const MemeCenter: React.FC = () => {
 
             {/* Right Panel */}
             <div className="rounded-2xl border border-amber-200 dark:border-stone-800 bg-amber-500/5 overflow-hidden flex flex-col shadow-sm">
-              <div className="bg-amber-100/40 dark:bg-amber-950/20 px-4 py-2 border-b border-amber-200 dark:border-stone-800 text-center font-bold text-xs uppercase tracking-wider text-amber-800 dark:text-amber-450">
+              <div className="bg-amber-100/40 dark:bg-amber-950/20 px-4 py-2 border-b border-amber-200 dark:border-stone-800 text-center font-bold text-xs uppercase tracking-wider text-amber-800 dark:text-amber-400">
                 {activeMeme.panelRightTitle || "The Ironical Reality 🌧️"}
               </div>
               <div className="p-6 flex-1 flex flex-col items-center justify-center space-y-3 text-center">
@@ -208,7 +209,7 @@ export const MemeCenter: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {/* Ignored choice (The Left Girl) */}
-              <div className="rounded-xl p-4 border border-stone-200 bg-stone-100/60 dark:border-stone-850 dark:bg-stone-955 flex flex-col items-center justify-center text-center space-y-2">
+              <div className="rounded-xl p-4 border border-stone-200 bg-stone-100/60 dark:border-stone-850 dark:bg-stone-950 flex flex-col items-center justify-center text-center space-y-2">
                 <span className="text-3xl">🚶‍♀️😢</span>
                 <p className="text-[11px] font-bold text-stone-400">The Simple, low-carbon option they ignore:</p>
                 <p className="text-xs font-bold text-stone-600 dark:text-stone-300">
@@ -217,7 +218,7 @@ export const MemeCenter: React.FC = () => {
               </div>
 
               {/* The Subject (Boyfriend) */}
-              <div className="rounded-xl p-4 border border-amber-300 bg-amber-550/5 flex flex-col items-center justify-center text-center space-y-2">
+              <div className="rounded-xl p-4 border border-amber-300 bg-amber-500/5 flex flex-col items-center justify-center text-center space-y-2">
                 <span className="text-3xl">👀🤔</span>
                 <p className="text-[11px] uppercase tracking-wider font-extrabold text-amber-700 dark:text-amber-500">
                   {activeMeme.boyfriendLabel || "Average Consumer"}
@@ -257,7 +258,7 @@ export const MemeCenter: React.FC = () => {
                   <p className="text-[10px] text-stone-400">@carbon_compass_ironies</p>
                 </div>
               </div>
-              <span className="font-mono text-[9px] px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-550">Web Meme</span>
+              <span className="font-mono text-[9px] px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-500">Web Meme</span>
             </div>
 
             {/* Social Content Post */}
@@ -287,7 +288,7 @@ export const MemeCenter: React.FC = () => {
       case 'classic':
       default:
         return (
-          <div className="relative rounded-2xl overflow-hidden border border-stone-205 dark:border-stone-800 bg-stone-950 p-6 flex flex-col justify-between min-h-[280px]">
+          <div className="relative rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-950 p-6 flex flex-col justify-between min-h-[280px]">
             {/* Top text overlay */}
             <div className="text-center z-10">
               <h2 className="font-serif font-black uppercase text-lg leading-7 text-white tracking-wide text-shadow-meme md:text-xl">
@@ -325,13 +326,13 @@ export const MemeCenter: React.FC = () => {
             <h1 className="font-display font-extrabold text-3xl tracking-tight text-stone-900 dark:text-stone-50">
               Eco-Meme Teaching Center
             </h1>
-            <p className="text-xs text-stone-450 mt-1 max-w-xl">
+            <p className="text-xs text-stone-400 mt-1 max-w-xl">
               Debunk carbon ironies and learn genuine sustainability science through viral web memes backed by academic consensus.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-[10px] bg-stone-100 px-3 py-1.5 rounded-lg dark:bg-stone-955 text-stone-400 select-none">
+        <div className="flex items-center gap-2 font-mono text-[10px] bg-stone-100 px-3 py-1.5 rounded-lg dark:bg-stone-950 text-stone-400 select-none">
           <Zap className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
           <span>Generator Online: 3.5 Flash</span>
         </div>
@@ -376,7 +377,7 @@ export const MemeCenter: React.FC = () => {
                 placeholder="e.g. flying 4,000 miles to give a speech about car emissions..."
                 value={userQuery}
                 onChange={(e) => setUserQuery(e.target.value)}
-                className="flex-1 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-xs text-stone-900 dark:bg-stone-955 dark:border-stone-850 dark:text-stone-50 focus:outline-none focus:ring-1 focus:ring-forest-500 transition-all font-medium"
+                className="flex-1 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-xs text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50 focus:outline-none focus:ring-1 focus:ring-forest-500 transition-all font-medium"
                 disabled={loading}
               />
               <button
@@ -408,7 +409,7 @@ export const MemeCenter: React.FC = () => {
                       generateMeme(prompt);
                     }}
                     disabled={loading}
-                    className="text-[10px] bg-stone-50 hover:bg-stone-100 dark:bg-stone-955 dark:hover:bg-stone-850 text-stone-550 border border-stone-150/40 px-2.5 py-1 rounded-lg text-left transition-colors font-medium truncate max-w-full"
+                    className="text-[10px] bg-stone-50 hover:bg-stone-100 dark:bg-stone-950 dark:hover:bg-stone-850 text-stone-500 border border-stone-150/40 px-2.5 py-1 rounded-lg text-left transition-colors font-medium truncate max-w-full"
                   >
                     "{prompt}"
                   </button>
@@ -418,7 +419,7 @@ export const MemeCenter: React.FC = () => {
           </div>
 
           {errorMsg && (
-            <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-xs text-rose-700 dark:bg-rose-955/20 dark:border-rose-900/30 dark:text-rose-400">
+            <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-xs text-rose-700 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-400">
               {errorMsg}
             </div>
           )}
@@ -430,7 +431,7 @@ export const MemeCenter: React.FC = () => {
               <span className="text-[10px] text-stone-500 font-bold italic">Interactive Illustration Below ↡</span>
             </div>
 
-            <div className="relative rounded-3xl border border-stone-200 bg-stone-55/60 p-6 min-h-[350px] flex flex-col justify-center dark:border-stone-850 dark:bg-stone-955">
+            <div className="relative rounded-3xl border border-stone-200 bg-stone-55/60 p-6 min-h-[350px] flex flex-col justify-center dark:border-stone-850 dark:bg-stone-950">
               {loading && (
                 <div className="absolute inset-0 bg-stone-950/85 z-20 rounded-3xl flex flex-col items-center justify-center text-center p-8 space-y-4 text-white">
                   <SpinnerMemeWheel />
@@ -462,7 +463,7 @@ export const MemeCenter: React.FC = () => {
           
           {/* Vote and Feedback indicator */}
           <div className="flex items-center justify-between rounded-xl bg-white border border-stone-200 px-4 py-3 dark:bg-stone-900 dark:border-stone-850 shadow-sm">
-            <span className="text-xs text-stone-450 font-bold uppercase tracking-wider">Meme Credibility Index</span>
+            <span className="text-xs text-stone-400 font-bold uppercase tracking-wider">Meme Credibility Index</span>
             <button
               onClick={() => handleUpvote(activeMeme.title)}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold select-none cursor-pointer transition-all ${voted[activeMeme.title] ? 'bg-forest-50 text-forest-700 dark:bg-forest-950/30' : 'bg-stone-100 hover:bg-stone-200 text-stone-600 dark:bg-stone-850'}`}
@@ -485,7 +486,7 @@ export const MemeCenter: React.FC = () => {
                   Meme Topic: <span className="text-forest-600 font-mono text-[11px] bg-forest-50 dark:bg-forest-950/30 px-2 py-0.5 rounded-md capitalize">{activeMeme.themeTopic || 'General Ecology'}</span>
                 </h4>
                 <p className="text-[10px] text-stone-400 font-mono font-bold uppercase tracking-wider mb-1">Title Concept: {activeMeme.title}</p>
-                <blockquote className="border-l-3 border-amber-400 pl-3 italic text-stone-500 dark:text-stone-450 leading-relaxed py-1.5 bg-stone-50 dark:bg-stone-955 rounded-r-xl">
+                <blockquote className="border-l-3 border-amber-400 pl-3 italic text-stone-500 dark:text-stone-400 leading-relaxed py-1.5 bg-stone-50 dark:bg-stone-950 rounded-r-xl">
                   &ldquo;{activeMeme.funnyPunchline}&rdquo;
                 </blockquote>
               </div>
@@ -512,7 +513,7 @@ export const MemeCenter: React.FC = () => {
               </div>
 
               <div className="pt-3 border-t border-stone-100 dark:border-stone-850 space-y-1">
-                <label className="font-extrabold text-emerald-800 dark:text-emerald-450 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+                <label className="font-extrabold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
                   <CheckCircle className="h-4 w-4 text-emerald-500" />
                   <span>Direct Corrective Action</span>
                 </label>
@@ -524,7 +525,7 @@ export const MemeCenter: React.FC = () => {
           </div>
 
           {/* Bottom Callout */}
-          <div className="rounded-2xl bg-amber-500/5 p-4 border border-amber-500/10 text-xs text-stone-550 dark:text-stone-400 leading-relaxed">
+          <div className="rounded-2xl bg-amber-500/5 p-4 border border-amber-500/10 text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
             <div className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-amber-400 mb-1">
               <HelpCircle className="h-4 w-4" />
               <span>Debunking Greenwashing Labels</span>

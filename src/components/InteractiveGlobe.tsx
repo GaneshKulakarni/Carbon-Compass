@@ -41,13 +41,13 @@ export const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({
   if (totalSavedKgs > 0) {
     if (totalSavedKgs < 30) {
       ecosystemStatus = 'Sprouting Seedling';
-      statusColor = 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-450';
+      statusColor = 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400';
     } else if (totalSavedKgs < 100) {
       ecosystemStatus = 'Growing Ecosystem';
-      statusColor = 'text-green-600 bg-green-50 dark:bg-green-950/20 dark:text-green-450';
+      statusColor = 'text-green-600 bg-green-50 dark:bg-green-950/20 dark:text-green-400';
     } else if (totalSavedKgs < 220) {
       ecosystemStatus = 'Flourishing Habitat';
-      statusColor = 'text-teal-600 bg-teal-50 dark:bg-teal-950/20 dark:text-teal-450';
+      statusColor = 'text-teal-600 bg-teal-50 dark:bg-teal-950/20 dark:text-teal-400';
     } else {
       ecosystemStatus = 'Ancient Carbon Sink';
       statusColor = 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20 dark:text-indigo-400';
@@ -574,7 +574,7 @@ export const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({
             <Sparkles className="h-4 w-4 text-emerald-500 animate-spin" />
             <span>Eco Check-in Confirmed! Restoration Zones Expanding...</span>
           </div>
-          <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 dark:bg-emerald-950/65 dark:text-emerald-350 px-1.5 py-0.5 rounded">Action Logged</span>
+          <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 dark:bg-emerald-950/65 dark:text-emerald-300 px-1.5 py-0.5 rounded">Action Logged</span>
         </div>
       )}
 
@@ -660,7 +660,7 @@ export const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({
               <span className="text-[9px] font-mono text-stone-400 uppercase font-bold block">Estimated Ecological Impact</span>
               <div className="flex items-center gap-2 pt-0.5">
                 <div className="h-7 w-7 rounded-lg bg-teal-50 dark:bg-teal-950/40 flex items-center justify-center shrink-0">
-                  <TreePine className="h-4 w-4 text-teal-650 dark:text-teal-400" />
+                  <TreePine className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block leading-tight">
