@@ -268,7 +268,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
               <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono">My Carbon Budget Remaining</span>
               <button 
                 onClick={onOpenMethodology}
-                className="text-stone-400 hover:text-stone-600 text-xs font-mono flex items-center gap-0.5"
+                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-xs font-mono flex items-center gap-0.5"
               >
                 <HelpCircle className="h-3.5 w-3.5" /> Factors
               </button>
@@ -365,7 +365,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
                 <div className="text-2xl font-display font-extrabold text-stone-900 dark:text-stone-50 leading-tight">
                   {streakInfo.current}-Day Streak
                 </div>
-                <p className="text-[11px] text-stone-400 dark:text-stone-500 font-medium">
+                <p className="text-[11px] text-stone-400 dark:text-stone-400 font-medium">
                   Best Record: {streakInfo.best} consecutive days
                 </p>
               </div>
@@ -428,7 +428,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
                 <div className="text-xl font-display font-bold text-stone-900 dark:text-stone-50">
                   {earnedBadgesCount} / {badges.length} Earned
                 </div>
-                <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">Badges unlocked</p>
+                <p className="text-xs text-stone-400 dark:text-stone-400 mt-0.5">Badges unlocked</p>
               </div>
             </div>
           </div>

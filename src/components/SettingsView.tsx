@@ -280,7 +280,7 @@ export const SettingsView: React.FC = () => {
                     id="btn-auth-mode-signin"
                     type="button"
                     onClick={() => { setAuthMode('login'); setLocalError(''); }}
-                    className={`flex-1 text-center py-1.5 rounded-md font-semibold text-[11px] transition-all capitalize select-none ${authMode === 'login' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}
+                    className={`flex-1 text-center py-1.5 rounded-md font-semibold text-[11px] transition-all capitalize select-none ${authMode === 'login' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-sm' : 'text-stone-400 hover:text-stone-600 dark:hover:text-stone-300'}`}
                   >
                     Sign In
                   </button>
@@ -288,7 +288,7 @@ export const SettingsView: React.FC = () => {
                     id="btn-auth-mode-signup"
                     type="button"
                     onClick={() => { setAuthMode('register'); setLocalError(''); }}
-                    className={`flex-1 text-center py-1.5 rounded-md font-semibold text-[11px] transition-all capitalize select-none ${authMode === 'register' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}
+                    className={`flex-1 text-center py-1.5 rounded-md font-semibold text-[11px] transition-all capitalize select-none ${authMode === 'register' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-sm' : 'text-stone-400 hover:text-stone-600 dark:hover:text-stone-300'}`}
                   >
                     Register
                   </button>
@@ -436,9 +436,9 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* Standard warning disclaimer */}
-          <div className="rounded-xl bg-stone-100 p-4 border border-stone-200 dark:bg-stone-950 dark:border-stone-850 text-xs text-stone-400 dark:text-stone-500 leading-relaxed font-sans">
-            <ShieldAlert className="h-4.5 w-4.5 mb-2 text-stone-500 text-stone-400" />
-            <span className="font-semibold text-stone-650 dark:text-stone-400">Security & Storage:</span> All inputs, logs, and streaks are recorded securely using your browser's offline `localStorage` key. Your data never travels to external servers, maintaining 100% cloud sovereignty.
+          <div className="rounded-xl bg-stone-100 p-4 border border-stone-200 dark:bg-stone-950 dark:border-stone-850 text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-sans">
+            <ShieldAlert className="h-4.5 w-4.5 mb-2 text-stone-500 dark:text-stone-400" />
+            <span className="font-semibold text-stone-700 dark:text-stone-300">Security & Storage:</span> All inputs, logs, and streaks are recorded securely using your browser's offline `localStorage` key. Your data never travels to external servers, maintaining 100% cloud sovereignty.
           </div>
 
         </div>

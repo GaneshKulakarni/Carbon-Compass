@@ -408,7 +408,7 @@ ${goals.length > 0 ? goals.map(g => `- [${g.progress}/${g.targetValue} Days Done
 
             {/* Social Broadcast links */}
             <div className="border-t border-stone-150 dark:border-stone-850 pt-4 space-y-2.5">
-              <span className="text-[10px] font-mono font-bold text-stone-400 dark:text-stone-500 uppercase block tracking-wider">
+              <span className="text-[10px] font-mono font-bold text-stone-400 dark:text-stone-400 uppercase block tracking-wider">
                 Direct External Broadcast
               </span>
 
@@ -455,7 +455,7 @@ ${goals.length > 0 ? goals.map(g => `- [${g.progress}/${g.targetValue} Days Done
               </div>
             </div>
 
-            <div className="text-[9px] text-stone-400 dark:text-stone-500 leading-relaxed italic bg-stone-50 dark:bg-stone-950/40 p-2.5 rounded-lg text-center font-serif">
+            <div className="text-[9px] text-stone-400 dark:text-stone-400 leading-relaxed italic bg-stone-50 dark:bg-stone-950/40 p-2.5 rounded-lg text-center font-serif">
               "LinkedIn shares will copy verified text metrics to your clipboard automatically so you can immediately paste it into your post writer."
             </div>
 

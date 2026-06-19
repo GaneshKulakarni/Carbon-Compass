@@ -253,7 +253,7 @@ export const QuickTracker: React.FC = () => {
                     <h5 className="font-bold text-xs text-stone-900 dark:text-stone-100 mt-1 leading-tight group-hover:text-forest-700 dark:group-hover:text-forest-400">
                       {preset.label}
                     </h5>
-                    <p className="text-[10px] text-stone-400 dark:text-stone-500">{preset.desc}</p>
+                    <p className="text-[10px] text-stone-400 dark:text-stone-400">{preset.desc}</p>
                   </div>
 
                   <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded">

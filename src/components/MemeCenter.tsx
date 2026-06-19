@@ -466,7 +466,7 @@ export const MemeCenter: React.FC = () => {
             <span className="text-xs text-stone-400 font-bold uppercase tracking-wider">Meme Credibility Index</span>
             <button
               onClick={() => handleUpvote(activeMeme.title)}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold select-none cursor-pointer transition-all ${voted[activeMeme.title] ? 'bg-forest-50 text-forest-700 dark:bg-forest-950/30' : 'bg-stone-100 hover:bg-stone-200 text-stone-600 dark:bg-stone-850'}`}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold select-none cursor-pointer transition-all ${voted[activeMeme.title] ? 'bg-forest-50 text-forest-700 dark:bg-forest-950/30' : 'bg-stone-100 hover:bg-stone-200 text-stone-600 dark:bg-stone-850 dark:text-stone-300 dark:hover:bg-stone-800'}`}
             >
               <ThumbsUp className="h-3.5 w-3.5" />
               <span>{upvotes[activeMeme.title] || 15 + activeMeme.title.length % 7} Eco Upvotes</span>

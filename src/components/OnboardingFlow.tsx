@@ -226,7 +226,7 @@ export const OnboardingFlow: React.FC = () => {
                     </div>
                     <div>
                       <div className="text-xs font-bold text-stone-900 dark:text-stone-100">{opt.label}</div>
-                      <p className="text-[11px] text-stone-400 dark:text-stone-500">{opt.desc}</p>
+                      <p className="text-[11px] text-stone-400 dark:text-stone-400">{opt.desc}</p>
                     </div>
                   </button>
                 ))}
@@ -326,7 +326,7 @@ export const OnboardingFlow: React.FC = () => {
                     </div>
                     <div>
                       <div className="text-xs font-bold text-stone-900 dark:text-stone-100">{energy.label}</div>
-                      <p className="text-[11px] text-stone-400 dark:text-stone-500">{energy.desc}</p>
+                      <p className="text-[11px] text-stone-400 dark:text-stone-400">{energy.desc}</p>
                     </div>
                   </button>
                 ))}
@@ -434,7 +434,7 @@ export const OnboardingFlow: React.FC = () => {
               {/* Main Score Metrics Callout */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-xl border border-stone-200 bg-stone-50 p-5 text-center dark:border-stone-800 dark:bg-stone-950">
-                  <span className="text-xs text-stone-400 dark:text-stone-500 font-medium">Estimated Monthly Carbon Footprint</span>
+                  <span className="text-xs text-stone-400 dark:text-stone-400 font-medium">Estimated Monthly Carbon Footprint</span>
                   <div className="mt-1.5 flex items-baseline justify-center space-x-1">
                     <span className="text-4.5xl font-display font-extrabold text-stone-900 dark:text-white">
                       {baseline.monthlyEstimate}
@@ -444,7 +444,7 @@ export const OnboardingFlow: React.FC = () => {
                 </div>
 
                 <div className="rounded-xl border border-stone-200 bg-stone-50 p-5 text-center dark:border-stone-800 dark:bg-stone-950">
-                  <span className="text-xs text-stone-400 dark:text-stone-500 font-medium">Pro-rated Annual Consumption</span>
+                  <span className="text-xs text-stone-400 dark:text-stone-400 font-medium">Pro-rated Annual Consumption</span>
                   <div className="mt-1.5 flex items-baseline justify-center space-x-1">
                     <span className="text-4.5xl font-display font-extrabold text-stone-950 dark:text-white">
                       {(baseline.yearlyEstimate / 1000).toFixed(1)}
@@ -456,7 +456,7 @@ export const OnboardingFlow: React.FC = () => {
 
               {/* Custom SVG Bar Graph of baseline metrics */}
               <div className="p-4 rounded-xl border border-stone-200 dark:border-stone-850 space-y-3 bg-stone-50/50 dark:bg-stone-950/30">
-                <h5 className="text-xs font-mono font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                <h5 className="text-xs font-mono font-bold uppercase tracking-wider text-stone-400 dark:text-stone-400">
                   Baseline Breakdown of Emissions:
                 </h5>
                 <div className="space-y-2.5 text-xs">

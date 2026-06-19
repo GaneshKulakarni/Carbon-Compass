@@ -414,7 +414,7 @@ export const WhatIfSimulator: React.FC = () => {
                       <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100 pt-1 leading-tight">
                         {rec.title}
                       </h4>
-                      <p className="text-[10px] text-stone-400 dark:text-stone-500 leading-relaxed font-sans mt-0.5">
+                      <p className="text-[10px] text-stone-400 dark:text-stone-400 leading-relaxed font-sans mt-0.5">
                         {rec.rationale}
                       </p>
                     </div>
