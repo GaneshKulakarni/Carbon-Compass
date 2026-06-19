@@ -388,9 +388,9 @@ export const SettingsView: React.FC = () => {
                 <button
                   id="btn-settings-load-demo"
                   onClick={loadDemoMode}
-                  className="w-full flex items-center justify-center space-x-1.5 p-3 rounded-xl border border-dashed border-amber-300 bg-amber-5 * hover:bg-amber-100 text-xs text-amber-80 * dark:border-amber-900/40 dark:bg-amber-95 * dark:text-amber-400 font-bold transition-all hover:scale-[1.01]"
+                  className="w-full flex items-center justify-center space-x-1.5 p-3 rounded-xl border border-dashed border-amber-300 bg-amber-50 hover:bg-amber-100 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-400 font-bold transition-all hover:scale-[1.01]"
                 >
-                  <Play className="h-3.5 w-3.5 fill-amber-70" />
+                  <Play className="h-3.5 w-3.5 fill-amber-700" />
                   <span>Switch to Alex (Rich Demo)</span>
                 </button>
               ) : (

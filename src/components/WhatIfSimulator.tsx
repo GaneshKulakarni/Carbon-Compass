@@ -403,10 +403,10 @@ export const WhatIfSimulator: React.FC = () => {
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
                       <div className="flex items-center space-x-1.5">
-                        <span className="inline-block rounded-md text-[10px] uppercase font-mono px-2 py-0.2 font-bold bg-amber-50 text-amber-80 * dark:bg-amber-950/30 dark:text-amber-400 group-hover:scale-105">
+                        <span className="inline-block rounded-md text-[10px] uppercase font-mono px-2 py-0.2 font-bold bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400 group-hover:scale-105">
                           Effort: {rec.effort}
                         </span>
-                        <span className="inline-block rounded-md text-[10px] uppercase font-mono px-2 py-0.2 font-bold bg-emerald-50 text-emerald-80 * dark:bg-emerald-950/30 dark:text-emerald-400">
+                        <span className="inline-block rounded-md text-[10px] uppercase font-mono px-2 py-0.2 font-bold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
                           Impact: {rec.impact}
                         </span>
                       </div>
