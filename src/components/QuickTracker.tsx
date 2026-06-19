@@ -536,10 +536,10 @@ export const QuickTracker: React.FC = () => {
                         {log.category}
                       </span>
                     </td>
-                    <td className="py-3 px-3 font-semibold text-stone-800 dark:text-stone-250">
+                    <td className="py-3 px-3 font-semibold text-stone-800 dark:text-stone-150">
                       {log.label}
                     </td>
-                    <td className="py-3 px-3 text-stone-500 font-mono">
+                    <td className="py-3 px-3 text-stone-500 dark:text-stone-400 font-mono">
                       {log.value} {log.unit}
                     </td>
                     <td className={`py-3 px-3 font-mono font-bold ${isSave ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-500'}`}>

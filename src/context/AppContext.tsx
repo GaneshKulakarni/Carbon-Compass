@@ -1,6 +1,22 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile, FootprintProfile, ActivityLog, Goal, Recommendation, MilestoneBadge } from '../types';
 import { calculateBaseline, generateClimatePersona, EMISSION_FACTORS } from '../constants/emissions';
+import { auth, db } from '../lib/firebase';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut as fbSignOut, 
+  onAuthStateChanged, 
+  updateProfile,
+  User as FirebaseUser,
+  GoogleAuthProvider,
+  signInWithPopup
+} from 'firebase/auth';
+import { 
+  doc, 
+  setDoc, 
+  getDoc
+} from 'firebase/firestore';
 
 interface AppContextProps {
   user: UserProfile | null;
@@ -13,6 +29,14 @@ interface AppContextProps {
   isDemoMode: boolean;
   theme: 'light' | 'dark';
   completedLessons: string[];
+  firebaseUser: FirebaseUser | null;
+  authError: string | null;
+  authLoading: boolean;
+  signUpEmail: (email: string, password: string, name: string) => Promise<void>;
+  signInEmail: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signOutFirebase: () => Promise<void>;
+  syncDataToCloud: (userState?: UserProfile | null, logsState?: ActivityLog[], goalsState?: Goal[]) => Promise<void>;
   setTheme: (theme: 'light' | 'dark') => void;
   setActiveTab: (tab: string) => void;
   completeOnboarding: (profile: UserProfile) => void;
@@ -161,14 +185,177 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
+  // Firebase auth & error states
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
+
+  // Monitor Firebase auth changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (fUser) => {
+      setFirebaseUser(fUser);
+      setAuthLoading(false);
+      if (fUser) {
+        // Logged in! Let's check if there is data on cloud
+        try {
+          const userDocRef = doc(db, 'users', fUser.uid);
+          const snap = await getDoc(userDocRef);
+          if (snap.exists()) {
+            const data = snap.data();
+            if (data.user) setUser(data.user);
+            if (data.footprint) setFootprint(data.footprint);
+            if (data.activityLogs) setActivityLogs(data.activityLogs);
+            if (data.goals) setGoals(data.goals);
+            // If they completed onboarding, load it, otherwise go to onboarding
+            if (data.user) {
+              // Stay on current tab unless it was landing/onboarding
+              setActiveTab((prev) => (prev === 'landing' || prev === 'onboarding') ? 'dashboard' : prev);
+            } else {
+              setActiveTab('onboarding');
+            }
+          } else {
+            // First time login - no profile on Firestore. Needs onboarding!
+            setUser(null);
+            setFootprint(null);
+            setActiveTab('onboarding');
+          }
+        } catch (e) {
+          console.error("Error reading Firestore profile: ", e);
+        }
+      } else {
+        setUser(null);
+        setFootprint(null);
+        setActivityLogs([]);
+        setGoals([]);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Sync state to cloud
+  const syncDataToCloud = async (userState?: UserProfile | null, logsState?: ActivityLog[], goalsState?: Goal[]) => {
+    const activeU = userState !== undefined ? userState : user;
+    const activeLogs = logsState !== undefined ? logsState : activityLogs;
+    const activeGoals = goalsState !== undefined ? goalsState : goals;
+
+    if (auth.currentUser && activeU) {
+      try {
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        await setDoc(userDocRef, {
+          user: activeU,
+          footprint: footprint,
+          activityLogs: activeLogs,
+          goals: activeGoals,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+        console.log("Firestore synced successfully!");
+      } catch (e) {
+        console.error("Firestore sync failed: ", e);
+      }
+    }
+  };
+
+  const signUpEmail = async (email: string, password: string, name: string) => {
+    setAuthError(null);
+    setAuthLoading(true);
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(credential.user, { displayName: name });
+      
+      setUser(null);
+      setFootprint(null);
+      setActivityLogs([]);
+      setGoals([]);
+      
+      setActiveTab('onboarding');
+    } catch (err: any) {
+      setAuthError(err.message || 'Failed to sign up');
+      throw err;
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const signInEmail = async (email: string, password: string) => {
+    setAuthError(null);
+    setAuthLoading(true);
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Load from Firestore
+      const userDocRef = doc(db, 'users', credential.user.uid);
+      const snap = await getDoc(userDocRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data.user) {
+          setUser(data.user);
+          if (data.footprint) setFootprint(data.footprint);
+          if (data.activityLogs) setActivityLogs(data.activityLogs);
+          if (data.goals) setGoals(data.goals);
+          setActiveTab('dashboard');
+        } else {
+          setActiveTab('onboarding');
+        }
+      } else {
+        setActiveTab('onboarding');
+      }
+    } catch (err: any) {
+      setAuthError(err.message || 'Failed to sign in');
+      throw err;
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    setAuthError(null);
+    setAuthLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const credential = await signInWithPopup(auth, provider);
+      
+      const userDocRef = doc(db, 'users', credential.user.uid);
+      const snap = await getDoc(userDocRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data.user) {
+          setUser(data.user);
+          if (data.footprint) setFootprint(data.footprint);
+          if (data.activityLogs) setActivityLogs(data.activityLogs);
+          if (data.goals) setGoals(data.goals);
+          setActiveTab('dashboard');
+        } else {
+          setActiveTab('onboarding');
+        }
+      } else {
+        setActiveTab('onboarding');
+      }
+    } catch (err: any) {
+      setAuthError(err.message || 'Failed to sign in with Google');
+      throw err;
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const signOutFirebase = async () => {
+    setAuthError(null);
+    try {
+      await fbSignOut(auth);
+      setUser(null);
+      setFootprint(null);
+      setActivityLogs([]);
+      setGoals([]);
+      setFirebaseUser(null);
+      setActiveTab('landing');
+    } catch (err: any) {
+      setAuthError(err.message || 'Failed to sign out');
+    }
+  };
+
   // Load from local storage on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('cc_user');
-    const savedFootprint = localStorage.getItem('cc_footprint');
-    const savedLogs = localStorage.getItem('cc_logs');
-    const savedGoals = localStorage.getItem('cc_goals');
-    const savedRecs = localStorage.getItem('cc_recs');
-    const savedBadges = localStorage.getItem('cc_badges');
     const savedTheme = localStorage.getItem('cc_theme');
     const savedLessons = localStorage.getItem('cc_lessons');
 
@@ -183,19 +370,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCompletedLessons([]);
       }
     }
-
-    if (savedUser && savedFootprint) {
-      setUser(JSON.parse(savedUser));
-      setFootprint(JSON.parse(savedFootprint));
-      setActivityLogs(savedLogs ? JSON.parse(savedLogs) : []);
-      setGoals(savedGoals ? JSON.parse(savedGoals) : []);
-      setRecommendations(savedRecs ? JSON.parse(savedRecs) : []);
-      setBadges(savedBadges ? JSON.parse(savedBadges) : INITIAL_BADGES);
-      setActiveTab('dashboard');
-    }
   }, []);
 
-  // Save to local storage when state changes
+  // Save to local storage when state changes; and sync online too
   useEffect(() => {
     if (user) localStorage.setItem('cc_user', JSON.stringify(user));
     if (footprint) localStorage.setItem('cc_footprint', JSON.stringify(footprint));
@@ -205,7 +382,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('cc_badges', JSON.stringify(badges));
     localStorage.setItem('cc_theme', theme);
     localStorage.setItem('cc_lessons', JSON.stringify(completedLessons));
-  }, [user, footprint, activityLogs, goals, recommendations, badges, theme, completedLessons]);
+
+    if (firebaseUser) {
+      syncDataToCloud(user, activityLogs, goals);
+    }
+  }, [user, footprint, activityLogs, goals, recommendations, badges, theme, completedLessons, firebaseUser]);
 
   const completeLesson = (lessonId: string) => {
     setCompletedLessons(prev => {
@@ -658,6 +839,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isDemoMode,
       theme,
       completedLessons,
+      firebaseUser,
+      authError,
+      authLoading,
+      signUpEmail,
+      signInEmail,
+      signInWithGoogle,
+      signOutFirebase,
+      syncDataToCloud,
       setTheme,
       setActiveTab,
       completeOnboarding,

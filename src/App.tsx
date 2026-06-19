@@ -12,24 +12,38 @@ import { WeeklyReport } from './components/WeeklyReport';
 import { LearnHub } from './components/LearnHub';
 import { SettingsView } from './components/SettingsView';
 import { MethodologyModal } from './components/MethodologyModal';
+import { CommunityFeed } from './components/CommunityFeed';
+import { MemeCenter } from './components/MemeCenter';
+import { AuthView } from './components/AuthView';
 
 function MainAppContent() {
-  const { user, activeTab } = useApp();
+  const { user, activeTab, firebaseUser, setAuthError } = useApp();
   const [isMethodologyOpen, setIsMethodologyOpen] = useState<boolean>(false);
 
   // Router dispatcher
   const renderTabContent = () => {
+    // 1. Static Public Pages (visible always)
     if (activeTab === 'landing') {
       return <LandingPage onOpenMethodology={() => setIsMethodologyOpen(true)} />;
     }
-
-    if (!user) {
-      if (activeTab === 'onboarding') {
-        return <OnboardingFlow />;
-      }
-      return <LandingPage onOpenMethodology={() => setIsMethodologyOpen(true)} />;
+    if (activeTab === 'learn') {
+      return <LearnHub />;
+    }
+    if (activeTab === 'memes') {
+      return <MemeCenter />;
     }
 
+    // 2. Gate Authentication (Premium tabs)
+    if (!firebaseUser) {
+      return <AuthView />;
+    }
+
+    // 3. Gate Profile Setup (User signed in but hasn't completed onboarding)
+    if (!user) {
+      return <OnboardingFlow />;
+    }
+
+    // 4. Authenticated & Onboarded Router
     switch (activeTab) {
       case 'dashboard':
         return <DashboardHome onOpenMethodology={() => setIsMethodologyOpen(true)} />;
@@ -39,10 +53,10 @@ function MainAppContent() {
         return <WhatIfSimulator />;
       case 'goals':
         return <GoalTracker />;
+      case 'community':
+        return <CommunityFeed />;
       case 'report':
         return <WeeklyReport />;
-      case 'learn':
-        return <LearnHub />;
       case 'settings':
         return <SettingsView />;
       default:

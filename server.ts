@@ -86,6 +86,81 @@ app.post("/api/gemini/analyze-scar", async (req, res) => {
   }
 });
 
+// Generate Custom Eco-Sustainability Meme using Gemini 3.5 Flash server-side
+app.post("/api/gemini/generate-meme", async (req, res) => {
+  try {
+    const { topic } = req.body;
+    const requestedTopic = topic || "general plastic pollution or energy waste";
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: `Generate a funny, viral eco-sustainability meme about "${requestedTopic}". The meme must highlight human hypocrisy or carbon ironies in a funny, lighthearted but deeply educational way, and then provide a powerful teaching paragraph. Use one of the classic meme templates specified in the templateType schema. Build corresponding values for that template type.`,
+      config: {
+        systemInstruction: "You are an expert climate educator with a brilliant, witty internet sense of humor. Create clean, extremely funny, meme captions and scenarios that highlight climate ironies, paired with a solid real-world science fact that teaches the audience how to solve it. Choose a templateType ('drake', 'two-panel', 'distracted', 'classic', 'modern-card') and populate the corresponding text properties of that template structure perfectly. Respond strictly in valid JSON format matching the schema.",
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING, description: "Witty name of this meme theme (e.g. 'The Active Transit Illusion')" },
+            themeTopic: { type: Type.STRING, description: "Category subtopic (e.g. 'Fast Fashion', 'Meat Diet', 'A/C Overuse')" },
+            templateType: { type: Type.STRING, description: "Must be exactly one of: 'drake', 'two-panel', 'distracted', 'classic', 'modern-card'" },
+            imageUrlOrDescription: { type: Type.STRING, description: "A detailed caricature description of what the animation/cartoon in the meme look like (e.g. 'A cat turning on a diesel generator to charge an electric toothbrush')" },
+            emojiSetup: { type: Type.STRING, description: "A string of 3-4 funny emojis matching the meme (e.g. '⚡🚨🌳🔌')" },
+            
+            // Text for classic and modern cards
+            topCaption: { type: Type.STRING, description: "Classic meme format - upper text (e.g. 'Buys reusable canvas grocery bag to protect turtle oceans')" },
+            bottomCaption: { type: Type.STRING, description: "Classic meme format - lower text (e.g. 'Uses plastic trash bags anyway')" },
+            
+            // Drake-style preference
+            drakeRejectText: { type: Type.STRING, description: "The bad choice that Drake rejects with hand up (e.g., 'Utilizing old backpacks and simple paper grocery bags')" },
+            drakeAcceptText: { type: Type.STRING, description: "The flashy, ironic eco choice Drake smiles at (e.g., 'Spending $150 on premium designer organic custom embroidered tote bags')" },
+            
+            // Distracted boyfriend
+            boyfriendLooksAt: { type: Type.STRING, description: "The shiny hypocritical choice (e.g., 'Buying a heavy EV hummer')" },
+            boyfriendIgnores: { type: Type.STRING, description: "The simple low-carbon solution being ignored (e.g., 'Riding electric town transit')" },
+            boyfriendLabel: { type: Type.STRING, description: "Label for the boyfriend character (e.g., 'Typical modern consumer')" },
+            
+            // Two panel Expectation vs Reality
+            panelLeftTitle: { type: Type.STRING, description: "Name of panel 1 (e.g., 'My expectations')" },
+            panelLeftText: { type: Type.STRING, description: "Text inside panel 1 (e.g., 'Riding a bicycle in pleasant sunset breeze')" },
+            panelRightTitle: { type: Type.STRING, description: "Name of panel 2 (e.g., 'The actual transition')" },
+            panelRightText: { type: Type.STRING, description: "Text inside panel 2 (e.g., 'Coughing behind an older diesel tractor in pouring rain')" },
+            
+            // Modern tweeter/social card
+            socialText: { type: Type.STRING, description: "Sarcastic eco-tweet content" },
+            
+            funnyPunchline: { type: Type.STRING, description: "A quick hilarious zinger summary" },
+            educationalFact: { type: Type.STRING, description: "The core sustainability educational science lesson: the raw truth about what we should do instead, backed up by realistic numbers." },
+            solutionTip: { type: Type.STRING, description: "One simple high-impact action the user can log or do to avoid this hypocrisy (e.g. 'Use your existing plastic bags or old backpack instead of buying custom novelty eco-totes')." }
+          },
+          required: [
+            "title", 
+            "themeTopic", 
+            "templateType", 
+            "imageUrlOrDescription", 
+            "emojiSetup", 
+            "topCaption", 
+            "bottomCaption", 
+            "funnyPunchline", 
+            "educationalFact", 
+            "solutionTip"
+          ]
+        }
+      }
+    });
+
+    const resultText = response.text;
+    if (!resultText) {
+      throw new Error("Empty response from Gemini.");
+    }
+
+    res.json(JSON.parse(resultText.trim()));
+  } catch (error: any) {
+    console.error("Gemini Meme generation error:", error);
+    res.status(500).json({ error: error.message || "Failed to generate eco meme" });
+  }
+});
+
 // Vite server fallback & express listener binding to 0.0.0.0
 async function setupServer() {
   if (process.env.NODE_ENV !== "production") {

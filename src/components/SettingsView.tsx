@@ -1,11 +1,58 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Settings, Save, Trash2, ShieldAlert, CheckCircle2, Play, RefreshCw, LogOut } from 'lucide-react';
+import { Settings, Save, Trash2, ShieldAlert, CheckCircle2, Play, RefreshCw, LogOut, Cloud, Lock, Mail, User as UserIcon } from 'lucide-react';
 import { calculateBaseline, generateClimatePersona } from '../constants/emissions';
 import { UserProfile } from '../types';
 
 export const SettingsView: React.FC = () => {
-  const { user, completeOnboarding, resetAllData, loadDemoMode, isDemoMode } = useApp();
+  const { 
+    user, 
+    completeOnboarding, 
+    resetAllData, 
+    loadDemoMode, 
+    isDemoMode,
+    firebaseUser,
+    authError,
+    authLoading,
+    signUpEmail,
+    signInEmail,
+    signOutFirebase,
+    setActiveTab
+  } = useApp();
+
+  // Auth State
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [authEmailVal, setAuthEmailVal] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authName, setAuthName] = useState('');
+  const [localError, setLocalError] = useState('');
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocalError('');
+    if (!authEmailVal.trim() || !authPassword.trim()) {
+      setLocalError('Please enter both email and password.');
+      return;
+    }
+    if (authPassword.length < 6) {
+      setLocalError('Password must be at least 6 characters long.');
+      return;
+    }
+    try {
+      if (authMode === 'register') {
+        if (!authName.trim()) {
+          setLocalError('Name is required for registration.');
+          return;
+        }
+        await signUpEmail(authEmailVal.trim(), authPassword, authName.trim());
+      } else {
+        await signInEmail(authEmailVal.trim(), authPassword);
+      }
+      setAuthPassword('');
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
 
   // Settings form copies
   const [name, setName] = useState(user?.name || '');
@@ -190,6 +237,140 @@ export const SettingsView: React.FC = () => {
         {/* Right Column: Demo triggers and deep resets */}
         <div className="space-y-6">
 
+          {/* Firestore Auth Synchronization Panel */}
+          <div className="rounded-2xl border border-stone-200/60 bg-white p-5 shadow-md dark:border-stone-850 dark:bg-stone-900">
+            <h3 className="font-display font-semibold text-stone-900 dark:text-stone-50 text-base mb-1 flex items-center gap-1.5">
+              <Cloud className="h-4.5 w-4.5 text-forest-500 animate-pulse" />
+              <span>Firebase Cloud Sync</span>
+            </h3>
+            <p className="text-xs text-stone-400 mb-4 leading-relaxed font-sans">
+              Connect a free secure account to maintain, back up, and sync your carbon ledger entries on Cloud Firestore dynamically across multiple sessions.
+            </p>
+
+            {firebaseUser ? (
+              <div className="space-y-4 font-sans text-xs">
+                <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-emerald-800 dark:text-emerald-400">✓ Sync Active</span>
+                    <span className="text-[9px] uppercase tracking-wider font-mono font-bold bg-emerald-105 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 px-1.5 py-0.2 rounded">Firestore</span>
+                  </div>
+                  <p className="text-stone-500 dark:text-stone-400 text-[11px] leading-relaxed">
+                    Your baseline footprint, daily tracker items, and habits are permanently secured.
+                  </p>
+                  <p className="font-mono text-[10px] text-stone-700 dark:text-stone-300 border-t border-emerald-500/10 mt-2 pt-1.5 overflow-hidden text-ellipsis">
+                    User: {firebaseUser.email}
+                  </p>
+                </div>
+                <button
+                  id="btn-settings-fb-signout"
+                  onClick={signOutFirebase}
+                  className="w-full flex items-center justify-center space-x-1.5 p-2.5 rounded-xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-700 dark:border-stone-800 dark:bg-stone-950 dark:hover:bg-stone-850 dark:text-stone-300 font-semibold transition-all cursor-pointer"
+                >
+                  <LogOut className="h-3.5 w-3.5 text-rose-500" />
+                  <span>Disconnect Cloud Profile</span>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 font-sans text-xs">
+                {/* Form selector tabs */}
+                <div className="flex bg-stone-50 dark:bg-stone-950 p-1 rounded-lg border border-stone-150/60 dark:border-stone-800/80 mb-3">
+                  <button 
+                    id="btn-auth-mode-signin"
+                    type="button"
+                    onClick={() => { setAuthMode('login'); setLocalError(''); }}
+                    className={`flex-1 text-center py-1.5 rounded-md font-semibold text-[11px] transition-all capitalize select-none ${authMode === 'login' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}
+                  >
+                    Sign In
+                  </button>
+                  <button 
+                    id="btn-auth-mode-signup"
+                    type="button"
+                    onClick={() => { setAuthMode('register'); setLocalError(''); }}
+                    className={`flex-1 text-center py-1.5 rounded-md font-semibold text-[11px] transition-all capitalize select-none ${authMode === 'register' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}
+                  >
+                    Register
+                  </button>
+                </div>
+
+                {localError && (
+                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-100 text-[10px] text-rose-700 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-455 font-semibold">
+                    {localError}
+                  </div>
+                )}
+                {authError && (
+                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-100 text-[10px] text-rose-700 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-455 font-semibold max-h-24 overflow-y-auto custom-scrollbar">
+                    {authError}
+                  </div>
+                )}
+
+                <form onSubmit={handleAuthSubmit} className="space-y-2.5">
+                  {authMode === 'register' && (
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-stone-500 uppercase flex items-center gap-1">
+                        <UserIcon className="h-3 w-3" />
+                        <span>Display Name</span>
+                      </label>
+                      <input
+                        id="auth-name-input"
+                        type="text"
+                        required
+                        placeholder="John Doe"
+                        value={authName}
+                        onChange={(e) => setAuthName(e.target.value)}
+                        className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs text-stone-900 dark:bg-stone-950 dark:border-stone-800 dark:text-stone-50"
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-stone-500 uppercase flex items-center gap-1">
+                      <Mail className="h-3 w-3" />
+                      <span>Email Address</span>
+                    </label>
+                    <input
+                      id="auth-email-input"
+                      type="email"
+                      required
+                      placeholder="you@example.com"
+                      value={authEmailVal}
+                      onChange={(e) => setAuthEmailVal(e.target.value)}
+                      className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs text-stone-900 dark:bg-stone-950 dark:border-stone-800 dark:text-stone-50"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-stone-500 uppercase flex items-center gap-1">
+                      <Lock className="h-3 w-3" />
+                      <span>Password</span>
+                    </label>
+                    <input
+                      id="auth-password-input"
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={authPassword}
+                      onChange={(e) => setAuthPassword(e.target.value)}
+                      className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs text-stone-900 dark:bg-stone-950 dark:border-stone-800 dark:text-stone-50"
+                    />
+                  </div>
+
+                  <button
+                    id="btn-auth-submit"
+                    type="submit"
+                    disabled={authLoading}
+                    className="w-full flex items-center justify-center p-2.5 rounded-xl bg-forest-600 text-white font-bold text-xs hover:bg-forest-700 disabled:opacity-50 transition-all shadow-sm shadow-forest-600/10 hover:scale-[1.01] cursor-pointer mt-3"
+                  >
+                    {authLoading ? (
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <span>{authMode === 'login' ? 'Sign In and Sync' : 'Create Account & Sync'}</span>
+                    )}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+
           {/* Sandbox Controls panel */}
           <div className="rounded-2xl border border-stone-200/60 bg-white p-5 shadow-md dark:border-stone-850 dark:bg-stone-900">
             <h3 className="font-display font-semibold text-stone-900 dark:text-stone-50 text-base mb-1">
@@ -229,7 +410,7 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* Standard warning disclaimer */}
-          <div className="rounded-xl bg-stone-100 p-4 border border-stone-200 dark:bg-stone-905 dark:border-stone-850 text-xs text-stone-400 dark:text-stone-500 leading-relaxed font-sans">
+          <div className="rounded-xl bg-stone-100 p-4 border border-stone-200 dark:bg-stone-950 dark:border-stone-850 text-xs text-stone-400 dark:text-stone-500 leading-relaxed font-sans">
             <ShieldAlert className="h-4.5 w-4.5 mb-2 text-stone-500 text-stone-400" />
             <span className="font-semibold text-stone-650 dark:text-stone-400">Security & Storage:</span> All inputs, logs, and streaks are recorded securely using your browser's offline `localStorage` key. Your data never travels to external servers, maintaining 100% cloud sovereignty.
           </div>

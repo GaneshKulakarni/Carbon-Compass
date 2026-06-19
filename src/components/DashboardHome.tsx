@@ -587,7 +587,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
               {primaryDriver?.emoji} {primaryDriver?.name} ({Math.round(primaryDriver?.val / (currentActual || 1) * 100)}%)
             </h4>
             <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed mt-2">
-              Our analysis indicates {primaryDriver?.name} represents your current month's highest carbon footprint source at <span className="font-mono font-bold text-stone-800 dark:text-stone-250">{primaryDriver?.val} kg CO₂e</span>. Try logging transits regularly or checking our "What-If" sliders to discover active mitigations.
+              Our analysis indicates {primaryDriver?.name} represents your current month's highest carbon footprint source at <span className="font-mono font-bold text-stone-800 dark:text-stone-200">{primaryDriver?.val} kg CO₂e</span>. Try logging transits regularly or checking our "What-If" sliders to discover active mitigations.
             </p>
           </div>
 
