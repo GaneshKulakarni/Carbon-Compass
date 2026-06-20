@@ -259,75 +259,149 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
       </div>
 
       {/* Main Stats Grid - carbon budget pairing with 3D Hologram Globe */}
-      <div className="grid gap-6 md:grid-cols-4 mb-8">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-12 mb-8">
         
-        {/* Footprint Balance Ring Card- takes 2 cols */}
-        <div className="md:col-span-2 rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between">
-          <div>
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono">My Carbon Budget Remaining</span>
-              <button 
-                onClick={onOpenMethodology}
-                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-xs font-mono flex items-center gap-0.5"
-              >
-                <HelpCircle className="h-3.5 w-3.5" /> Factors
-              </button>
-            </div>
-
-            <div className="flex items-center gap-6 mt-4">
-              {/* Circular Gauge natively drawn with SVG */}
-              <div className="relative h-28 w-28 shrink-0 select-none">
-                <svg className="h-full w-full transform -rotate-90">
-                  <circle
-                    cx="56"
-                    cy="56"
-                    r="46"
-                    stroke="#e2ede6"
-                    strokeWidth="9"
-                    fill="transparent"
-                    className="dark:stroke-stone-800"
-                  />
-                  <circle
-                    cx="56"
-                    cy="56"
-                    r="46"
-                    stroke="#10b981"
-                    strokeWidth="9"
-                    fill="transparent"
-                    strokeDasharray={289}
-                    strokeDashoffset={289 - (289 * progressPercent) / 100}
-                    className="transition-all duration-500"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-display font-extrabold text-stone-900 dark:text-stone-50">
-                    {progressPercent}%
-                  </span>
-                  <span className="text-[9px] text-stone-400 font-bold uppercase">Expenditure</span>
-                </div>
+        {/* Left Column: Carbon Budget & Streak Snapshot */}
+        <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
+          {/* Footprint Balance Ring Card */}
+          <div className="rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900">
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono">My Carbon Budget Remaining</span>
+                <button 
+                  onClick={onOpenMethodology}
+                  className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-xs font-mono flex items-center gap-0.5"
+                >
+                  <HelpCircle className="h-3.5 w-3.5" /> Factors
+                </button>
               </div>
 
-              <div>
-                <div className="flex items-baseline space-x-1">
-                  <span className="text-4xl font-display font-extrabold text-stone-900 dark:text-white">
-                    {currentActual}
-                  </span>
-                  <span className="text-xs font-semibold text-stone-500">kg CO₂e</span>
+              <div className="flex items-center gap-6 mt-4">
+                {/* Circular Gauge natively drawn with SVG */}
+                <div className="relative h-28 w-28 shrink-0 select-none">
+                  <svg className="h-full w-full transform -rotate-90">
+                    <circle
+                      cx="56"
+                      cy="56"
+                      r="46"
+                      stroke="#e2ede6"
+                      strokeWidth="9"
+                      fill="transparent"
+                      className="dark:stroke-stone-800"
+                    />
+                    <circle
+                      cx="56"
+                      cy="56"
+                      r="46"
+                      stroke="#10b981"
+                      strokeWidth="9"
+                      fill="transparent"
+                      strokeDasharray={289}
+                      strokeDashoffset={289 - (289 * progressPercent) / 100}
+                      className="transition-all duration-500"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-2xl font-display font-extrabold text-stone-900 dark:text-stone-50">
+                      {progressPercent}%
+                    </span>
+                    <span className="text-[9px] text-stone-400 font-bold uppercase">Expenditure</span>
+                  </div>
                 </div>
-                <p className="text-xs text-stone-400 mt-1 leading-relaxed">
-                  Actual emissions this month vs. baseline of <span className="font-semibold text-stone-700 dark:text-stone-200">{baselineMonthly} kg</span>.
-                </p>
-                <div className="mt-2.5 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold font-mono">
-                  <TrendingDown className="h-4 w-4" />
-                  <span>Saves: ↓ {savedThisMonth.toFixed(1)} kg saved this month</span>
+
+                <div>
+                  <div className="flex items-baseline space-x-1">
+                    <span className="text-4xl font-display font-extrabold text-stone-900 dark:text-white">
+                      {currentActual}
+                    </span>
+                    <span className="text-xs font-semibold text-stone-500">kg CO₂e</span>
+                  </div>
+                  <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+                    Actual emissions this month vs. baseline of <span className="font-semibold text-stone-700 dark:text-stone-200">{baselineMonthly} kg</span>.
+                  </p>
+                  <div className="mt-2.5 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold font-mono">
+                    <TrendingDown className="h-4 w-4" />
+                    <span>Saves: ↓ {savedThisMonth.toFixed(1)} kg saved this month</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Dynamic Streak Snapshot Card */}
+          <div className="rounded-2xl border border-stone-200/60 bg-white p-5 shadow-xs dark:border-stone-850 dark:bg-stone-900" id="streak-snapshot-widget">
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono">Streak Snapshot</span>
+                {streakInfo.warning ? (
+                  <span className="text-[9px] uppercase font-mono text-amber-500 bg-amber-500/5 px-2 py-0.5 rounded font-bold border border-amber-500/10 animate-pulse">At Risk</span>
+                ) : (
+                  <span className="text-[9px] uppercase font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-bold dark:bg-emerald-950/20 dark:text-emerald-400">Streak Active</span>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-3.5 mt-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 text-2xl font-bold font-mono shadow-xs animate-bounce-slow shrink-0">
+                  🔥
+                </div>
+                <div>
+                  <div className="text-2xl font-display font-extrabold text-stone-900 dark:text-stone-50 leading-tight">
+                    {streakInfo.current}-Day Streak
+                  </div>
+                  <p className="text-[11px] text-stone-400 dark:text-stone-400 font-medium">
+                    Best Record: {streakInfo.best} consecutive days
+                  </p>
+                </div>
+              </div>
+
+              {/* Streak Risk Alert or Motivational Line */}
+              <div className="mt-4 pt-3.5 border-t border-stone-100 dark:border-stone-800">
+                {streakInfo.warning ? (
+                  <div className="p-2.5 rounded-lg bg-rose-500/5 border border-rose-500/15 text-[11px] text-rose-600 dark:text-rose-400 flex items-start gap-1.5 leading-relaxed">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                    <span>Your active streak expires tonight! Log an action now to protect your progress.</span>
+                  </div>
+                ) : streakInfo.current > 0 ? (
+                  <div className="text-[11.5px] text-stone-550 dark:text-stone-400 flex items-center gap-1.5 font-sans">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                    <span>Next milestone: achieve <strong>{(Math.floor(streakInfo.current / 7) + 1) * 7}-Day Badge</strong> ({7 - (streakInfo.current % 7)} days away)</span>
+                  </div>
+                ) : (
+                  <div className="text-[11.5px] text-stone-550 dark:text-stone-400 flex items-center gap-1.5 font-sans">
+                    <Flame className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                    <span>No consecutive log record found. Save your first carbon preset to ignite your streak!</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Past 7 Days Consistency Heatmap */}
+              <div className="mt-4 pt-3.5 border-t border-stone-100 dark:border-stone-800">
+                <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider font-mono block mb-2">Past 7 Days Consistency</span>
+                <div className="flex justify-between gap-1.5">
+                  {[6, 5, 4, 3, 2, 1, 0].map(daysAgo => {
+                    const checkDateStr = new Date(Date.now() - daysAgo * 24 * 3600 * 1000).toISOString().split('T')[0];
+                    const dayName = new Date(Date.now() - daysAgo * 24 * 3600 * 1000).toLocaleDateString('en-US', { weekday: 'narrow' });
+                    const isToday = daysAgo === 0;
+                    const loggedOnDay = (Array.from(new Set(activityLogs.map(log => log.createdAt.split('T')[0]))) as string[]).includes(checkDateStr);
+                    
+                    return (
+                      <div key={daysAgo} className="flex flex-col items-center">
+                        <div className={`h-6.5 w-6.5 rounded-lg flex items-center justify-center text-[10px] font-bold ${loggedOnDay ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-500/10' : isToday ? 'border border-dashed border-amber-400 bg-amber-500/5 text-amber-600' : 'bg-stone-50 text-stone-300 dark:bg-stone-950 dark:text-stone-700 border border-stone-100 dark:border-stone-850'}`}>
+                          {loggedOnDay ? '✓' : '•'}
+                        </div>
+                        <span className="text-[9px] text-stone-400 font-mono mt-1 capitalize">{dayName}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
 
-        {/* 3D Planet Vitality Globe Card - takes 2 cols */}
-        <div className="md:col-span-2 rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between">
+        {/* 3D Planet Vitality Globe Card - takes 7 cols */}
+        <div className="lg:col-span-7 rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between h-full">
           <React.Suspense fallback={
             <div className="flex items-center justify-center h-40 text-stone-400">
               <div className="text-center space-y-2">
@@ -342,80 +416,9 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
 
       </div>
 
-      {/* Habit Momentum and Achievements row */}
-      <div className="grid gap-6 md:grid-cols-2 mb-8">
+      {/* Achievements and Daily Shock Fact row */}
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 mb-8">
         
-        {/* Dynamic Streak Snapshot Card */}
-        <div className="rounded-2xl border border-stone-200/60 bg-white p-5 shadow-xs dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between" id="streak-snapshot-widget">
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono">Streak Snapshot</span>
-              {streakInfo.warning ? (
-                <span className="text-[9px] uppercase font-mono text-amber-500 bg-amber-500/5 px-2 py-0.5 rounded font-bold border border-amber-500/10 animate-pulse">At Risk</span>
-              ) : (
-                <span className="text-[9px] uppercase font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-bold dark:bg-emerald-950/20 dark:text-emerald-400">Streak Active</span>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-3.5 mt-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 text-2xl font-bold font-mono shadow-xs animate-bounce-slow shrink-0">
-                🔥
-              </div>
-              <div>
-                <div className="text-2xl font-display font-extrabold text-stone-900 dark:text-stone-50 leading-tight">
-                  {streakInfo.current}-Day Streak
-                </div>
-                <p className="text-[11px] text-stone-400 dark:text-stone-400 font-medium">
-                  Best Record: {streakInfo.best} consecutive days
-                </p>
-              </div>
-            </div>
-
-            {/* Streak Risk Alert or Motivational Line */}
-            <div className="mt-4 pt-3.5 border-t border-stone-100 dark:border-stone-800">
-              {streakInfo.warning ? (
-                <div className="p-2.5 rounded-lg bg-rose-500/5 border border-rose-500/15 text-[11px] text-rose-600 dark:text-rose-400 flex items-start gap-1.5 leading-relaxed">
-                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                  <span>Your active streak expires tonight! Log an action now to protect your progress.</span>
-                </div>
-              ) : streakInfo.current > 0 ? (
-                <div className="text-[11.5px] text-stone-500 dark:text-stone-400 flex items-center gap-1.5 font-sans">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                  <span>Next milestone: achieve <strong>{(Math.floor(streakInfo.current / 7) + 1) * 7}-Day Badge</strong> ({7 - (streakInfo.current % 7)} days away)</span>
-                </div>
-              ) : (
-                <div className="text-[11.5px] text-stone-550 dark:text-stone-400 flex items-center gap-1.5 font-sans">
-                  <Flame className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                  <span>No consecutive log record found. Save your first carbon preset to ignite your streak!</span>
-                </div>
-              )}
-            </div>
-
-            {/* Past 7 Days Consistency Heatmap */}
-            <div className="mt-4 pt-3.5 border-t border-stone-100 dark:border-stone-800">
-              <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider font-mono block mb-2">Past 7 Days Consistency</span>
-              <div className="flex justify-between gap-1.5">
-                {[6, 5, 4, 3, 2, 1, 0].map(daysAgo => {
-                  const checkDateStr = new Date(Date.now() - daysAgo * 24 * 3600 * 1000).toISOString().split('T')[0];
-                  const dayName = new Date(Date.now() - daysAgo * 24 * 3600 * 1000).toLocaleDateString('en-US', { weekday: 'narrow' });
-                  const isToday = daysAgo === 0;
-                  const loggedOnDay = (Array.from(new Set(activityLogs.map(log => log.createdAt.split('T')[0]))) as string[]).includes(checkDateStr);
-                  
-                  return (
-                    <div key={daysAgo} className="flex flex-col items-center">
-                      <div className={`h-6.5 w-6.5 rounded-lg flex items-center justify-center text-[10px] font-bold ${loggedOnDay ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-500/10' : isToday ? 'border border-dashed border-amber-400 bg-amber-500/5 text-amber-600' : 'bg-stone-50 text-stone-300 dark:bg-stone-950 dark:text-stone-700 border border-stone-100 dark:border-stone-850'}`}>
-                        {loggedOnDay ? '✓' : '•'}
-                      </div>
-                      <span className="text-[9px] text-stone-400 font-mono mt-1 capitalize">{dayName}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-          </div>
-        </div>
-
         {/* Carbon Coins / Badge widget */}
         <div className="rounded-2xl border border-stone-200/60 bg-white p-5 shadow-xs dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between">
           <div>
@@ -433,20 +436,49 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
             </div>
           </div>
           <div className="border-t border-stone-100 dark:border-stone-800 pt-3.5 mt-4 flex justify-between items-center text-[11px]">
-            <span className="text-stone-500 font-medium">Latest:</span>
+            <span className="text-stone-550 font-medium">Latest:</span>
             <span className="font-bold text-indigo-600 dark:text-indigo-400">
               {badges.filter(b => b.earnedAt).reverse()[0]?.title || 'Awaiting First log'}
             </span>
           </div>
         </div>
 
+        {/* Daily Shock Card - takes 1 col */}
+        <div className="rounded-2xl border border-amber-200/50 bg-amber-50/20 p-6 shadow-md dark:border-stone-800 dark:bg-stone-900/40 flex flex-col justify-between" id="daily-shock-card">
+          <div>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider font-mono">Daily Shock Fact</span>
+              <button 
+                onClick={() => setShockIndex(prev => (prev + 1) % DAILY_SHOCKS.length)}
+                className="p-1 rounded hover:bg-amber-100/40 text-stone-400"
+                title="Next shock fact"
+              >
+                <RefreshCw className="h-3.5 w-3.5 pb-0.5" />
+              </button>
+            </div>
+            
+            <div className="mt-3.5">
+              <span className="text-[9px] font-bold font-mono tracking-wider text-amber-800 dark:text-amber-300 bg-amber-100/50 dark:bg-amber-950/40 px-2 py-0.5 rounded uppercase">
+                {DAILY_SHOCKS[shockIndex].badge}
+              </span>
+              <h4 className="font-display font-extrabold text-sm text-stone-900 dark:text-stone-50 mt-2.5 leading-snug">
+                {DAILY_SHOCKS[shockIndex].title}
+              </h4>
+              <p className="text-xs text-stone-500 dark:text-stone-300 leading-relaxed mt-2.5">
+                {DAILY_SHOCKS[shockIndex].desc}
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-amber-100/45 text-[10px] text-stone-400 font-mono tracking-wide">
+            Fact #{shockIndex + 1} of {DAILY_SHOCKS.length} • Tap refresh button to cycle
+          </div>
+        </div>
+
       </div>
 
-      {/* Compare Me to the World & Daily Shock Fact Row */}
-      <div className="grid gap-6 md:grid-cols-3 mb-8">
-        
-        {/* Compare Me to the World Card - takes 2 cols */}
-        <div className="md:col-span-2 rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900 flex flex-col justify-between" id="compare-world-card">
+      {/* Compare Me to the World Row */}
+      <div className="mb-8" id="compare-world-card">
+        <div className="w-full rounded-2xl border border-stone-200/60 bg-white p-6 shadow-md dark:border-stone-850 dark:bg-stone-900">
           <div>
             <div className="flex justify-between items-center mb-4">
               <span className="text-xs font-bold text-stone-400 uppercase tracking-wider font-mono">Compare Me To The World</span>
@@ -484,7 +516,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
               })}
             </div>
           </div>
-          <div className="mt-4 pt-4 border-t border-stone-100 dark:border-stone-850 text-[10.5px] text-stone-500 dark:text-stone-400 italic">
+          <div className="mt-4 pt-4 border-t border-stone-100 dark:border-stone-850 text-[10.5px] text-stone-550 dark:text-stone-450 italic">
             {currentActual <= 166 
               ? "🎉 Exceptional performance! You are currently operating within the sustainable 1.5°C climate limit."
               : currentActual <= (user?.region === 'US' ? 1333 : (user?.region === 'EU' ? 533 : 391))
@@ -493,38 +525,6 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({ onOpenMethodology 
             }
           </div>
         </div>
-
-        {/* Daily Shock Card - takes 1 col */}
-        <div className="rounded-2xl border border-amber-200/50 bg-amber-50/20 p-6 shadow-md dark:border-stone-800 dark:bg-stone-900/40 flex flex-col justify-between" id="daily-shock-card">
-          <div>
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider font-mono">Daily Shock Fact</span>
-              <button 
-                onClick={() => setShockIndex(prev => (prev + 1) % DAILY_SHOCKS.length)}
-                className="p-1 rounded hover:bg-amber-100/40 text-stone-400"
-                title="Next shock fact"
-              >
-                <RefreshCw className="h-3.5 w-3.5 pb-0.5" />
-              </button>
-            </div>
-            
-            <div className="mt-3.5">
-              <span className="text-[9px] font-bold font-mono tracking-wider text-amber-800 dark:text-amber-300 bg-amber-100/50 dark:bg-amber-950/40 px-2 py-0.5 rounded uppercase">
-                {DAILY_SHOCKS[shockIndex].badge}
-              </span>
-              <h4 className="font-display font-extrabold text-sm text-stone-900 dark:text-stone-50 mt-2.5 leading-snug">
-                {DAILY_SHOCKS[shockIndex].title}
-              </h4>
-              <p className="text-xs text-stone-500 dark:text-stone-300 leading-relaxed mt-2.5">
-                {DAILY_SHOCKS[shockIndex].desc}
-              </p>
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-amber-100/45 text-[10px] text-stone-400 font-mono tracking-wide">
-            Fact #{shockIndex + 1} of {DAILY_SHOCKS.length} • Tap refresh button to cycle
-          </div>
-        </div>
-
       </div>
 
       {/* Main Split Layout: Category breakdown AND recommendation highlight */}

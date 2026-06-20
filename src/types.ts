@@ -82,3 +82,16 @@ export interface MilestoneBadge {
   earnedAt?: string;
   icon: string;
 }
+
+export interface TragedySlide {
+  title: string;
+  subtitle: string;
+  description: string;
+  significance: string;
+  quote: string;
+  author: string;
+  imageUrl: string;
+  stat: string;
+  statLabel: string;
+  isUserUploaded?: boolean;
+}

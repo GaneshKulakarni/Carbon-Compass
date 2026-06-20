@@ -542,7 +542,7 @@ export const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({
     return (
       <div 
         ref={mountRef}
-        className="w-full h-64 md:h-80 relative group rounded-2xl bg-gradient-to-b from-stone-900/40 to-stone-950/60 p-2 border border-stone-200/50 dark:border-stone-850/80 cursor-grab active:cursor-grabbing overflow-hidden flex items-center justify-center animate-fade-in"
+        className="w-full h-64 md:h-80 relative group rounded-2xl bg-gradient-to-b from-stone-900/40 to-stone-950/60 p-2 border border-stone-300 dark:border-stone-700 hover:border-emerald-500/40 dark:hover:border-emerald-400/35 transition-all duration-300 shadow-[0_0_12px_rgba(16,185,129,0.04)] hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] dark:hover:shadow-[0_0_25px_rgba(16,185,129,0.22)] cursor-grab active:cursor-grabbing overflow-hidden flex items-center justify-center animate-fade-in"
         id="3d-earth-camera-stage-isolated"
       >
         <div className="absolute inset-0 transition-opacity duration-1000 ease-in-out pointer-events-none opacity-25 blur-3xl bg-radial-gradient from-blue-500/25 via-emerald-500/10 to-transparent" />
@@ -584,7 +584,7 @@ export const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({
         {/* Globe Container (Takes 3 columns) */}
         <div 
           ref={mountRef}
-          className="md:col-span-3 h-64 md:h-80 w-full relative group rounded-2xl bg-gradient-to-b from-stone-900/40 to-stone-950/60 p-2 border border-stone-200/50 dark:border-stone-850/80 cursor-grab active:cursor-grabbing overflow-hidden flex items-center justify-center"
+          className="md:col-span-3 h-64 md:h-80 w-full relative group rounded-2xl bg-gradient-to-b from-stone-900/40 to-stone-950/60 p-2 border border-stone-300 dark:border-stone-700 hover:border-emerald-500/40 dark:hover:border-emerald-400/35 transition-all duration-300 shadow-[0_0_12px_rgba(16,185,129,0.04)] hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] dark:hover:shadow-[0_0_25px_rgba(16,185,129,0.22)] cursor-grab active:cursor-grabbing overflow-hidden flex items-center justify-center"
           id="3d-earth-camera-stage"
         >
           {/* Subtle localized glow inside the stage */}

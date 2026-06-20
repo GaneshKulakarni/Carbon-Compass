@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { UserProfile, FootprintProfile, ActivityLog, Goal, Recommendation, MilestoneBadge } from '../types';
+import { UserProfile, FootprintProfile, ActivityLog, Goal, Recommendation, MilestoneBadge, TragedySlide } from '../types';
 import { calculateBaseline, generateClimatePersona, EMISSION_FACTORS } from '../constants/emissions';
 
 export interface AuthUser {
@@ -38,6 +38,10 @@ interface AppContextProps {
   resetAllData: () => void;
   loadDemoMode: () => void;
   setGoals: React.Dispatch<React.SetStateAction<Goal[]>>;
+  userTragedy: TragedySlide | null;
+  setUserTragedy: React.Dispatch<React.SetStateAction<TragedySlide | null>>;
+  selectedFileBase64: string | null;
+  setSelectedFileBase64: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -173,6 +177,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [userTragedy, setUserTragedy] = useState<TragedySlide | null>(null);
+  const [selectedFileBase64, setSelectedFileBase64] = useState<string | null>(null);
 
   // Custom auth & error states
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -848,6 +854,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setBadges(INITIAL_BADGES);
     setIsDemoMode(false);
     setActiveTab('landing');
+    setUserTragedy(null);
+    setSelectedFileBase64(null);
     localStorage.clear();
   };
 
@@ -881,7 +889,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       completeLesson,
       resetAllData,
       loadDemoMode,
-      setGoals
+      setGoals,
+      userTragedy,
+      setUserTragedy,
+      selectedFileBase64,
+      setSelectedFileBase64
     }}>
       {children}
     </AppContext.Provider>

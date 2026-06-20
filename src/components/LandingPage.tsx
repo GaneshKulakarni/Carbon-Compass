@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useApp } from '../context/AppContext';
+import plasticShroudImg from '../assets/plastic_shroud.png';
 // Lazy-load the Three.js globe — defers the ~400KB Three.js bundle until needed
 const InteractiveGlobe = React.lazy(() => import('./InteractiveGlobe').then(m => ({ default: m.InteractiveGlobe })));
 import { 
@@ -28,19 +29,24 @@ interface TragedySlide {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) => {
-  const { setActiveTab, loadDemoMode } = useApp();
+  const { 
+    setActiveTab, 
+    loadDemoMode,
+    userTragedy,
+    setUserTragedy,
+    selectedFileBase64,
+    setSelectedFileBase64
+  } = useApp();
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeViewMode, setActiveViewMode] = useState<'scars' | 'healing'>('scars');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [showGlobeHint, setShowGlobeHint] = useState(false);
 
   // Upload & Scan state
-  const [selectedFileBase64, setSelectedFileBase64] = useState<string | null>(null);
   const [selectedMimeType, setSelectedMimeType] = useState<string>('');
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanStatusMsg, setScanStatusMsg] = useState('Initiating spectrum check...');
-  const [userTragedy, setUserTragedy] = useState<TragedySlide | null>(null);
 
   // Active status log loop for Gemini analyzing
   const systemLogsMsg = [
@@ -81,6 +87,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
     }
 
     setUploadError(null);
+    setUserTragedy(null);
     setSelectedMimeType(file.type);
 
     const reader = new FileReader();
@@ -227,7 +234,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
       significance: "This photograph depicts our everyday synthetic footprint suffocating marine ecosystems from inside out. Microparticles and single-use polymer waste now dominate coral habitats globally.",
       quote: "Every single piece of plastic ever created still exists somewhere on this planet. It has found its way to the hearts of our pristine seas.",
       author: "World Wildlife Fund (WWF)",
-      imageUrl: "https://images.unsplash.com/photo-1621451537084-482c730737ee?q=80&w=1000",
+      imageUrl: plasticShroudImg,
       stat: "8,000,000 t",
       statLabel: "Plastic dumped in oceans yearly"
     },
@@ -409,16 +416,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenMethodology }) =
                 <div className="space-y-3">
                   {/* Polaroid Frame Preview */}
                   <div className="relative rounded-lg overflow-hidden border border-stone-200 dark:border-stone-800 bg-stone-950/40 p-2">
-                    <img 
-                      src={selectedFileBase64} 
-                      alt="Local Upload Preview" 
-                      className="w-full h-32 object-cover rounded-md" 
-                    />
+                    <div className="relative h-32 rounded-md overflow-hidden group/preview">
+                      <img 
+                        src={selectedFileBase64} 
+                        alt="Local Upload Preview" 
+                        className="w-full h-full object-cover group-hover/preview:opacity-75 transition-opacity" 
+                      />
+                      
+                      {/* Change image overlay */}
+                      {!isScanning && (
+                        <label className="absolute inset-0 bg-stone-950/60 opacity-0 group-hover/preview:opacity-100 flex flex-col items-center justify-center transition-opacity text-white text-[10px] font-bold cursor-pointer">
+                          <UploadCloud className="h-5 w-5 mb-1 text-orange-400 animate-pulse" />
+                          <span>Click to Change Image</span>
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            onChange={handleFileChange} 
+                            accept="image/*" 
+                          />
+                        </label>
+                      )}
+                    </div>
                     
                     {!userTragedy && !isScanning && (
                       <button 
-                        onClick={removeUploadedFile}
-                        className="absolute top-4 right-4 h-8 w-8 rounded-full bg-stone-950/80 hover:bg-red-950 text-white flex items-center justify-center border border-stone-800 transition"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeUploadedFile();
+                        }}
+                        className="absolute top-4 right-4 h-8 w-8 rounded-full bg-stone-950/80 hover:bg-red-950 text-white flex items-center justify-center border border-stone-800 transition z-10"
                         title="Remove uploaded image"
                       >
                         <Trash2 className="h-4 w-4" />
