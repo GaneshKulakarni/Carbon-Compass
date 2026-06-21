@@ -109,13 +109,9 @@ export const Navbar: React.FC = () => {
               <span className="font-display text-sm font-extrabold tracking-tight text-stone-900 dark:text-stone-50 select-none">
                 Carbon<span className="text-forest-600 dark:text-emerald-400">Compass</span>
               </span>
-              {(authUser || isDemoMode) && user ? (
+              {(authUser || isDemoMode) && user && (
                 <span className="text-[8px] text-stone-400 font-mono font-bold -mt-0.5 tracking-wider uppercase">
                   {user.climatePersona || 'SUSTAINABLE OBSERVER'}
-                </span>
-              ) : (
-                <span className="text-[8px] text-stone-400 dark:text-stone-500 font-mono font-bold -mt-0.5 tracking-wider uppercase">
-                  Eco-Meme Teaching Center
                 </span>
               )}
             </div>
