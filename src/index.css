@@ -96,3 +96,9 @@
   backdrop-filter: blur(12px);
   border: 1px solid rgba(167, 243, 208, 0.15);
 }
+
+/* Accessibility Focus outlines for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid #059669 !important; /* forest-600 */
+  outline-offset: 2px !important;
+}

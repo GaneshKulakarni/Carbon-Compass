@@ -13,6 +13,14 @@ export interface UserProfile {
   wasteHabits: 'recycles_all' | 'recycles_some' | 'no_recycling';
   goalPreference: 'save_money' | 'reduce_carbon' | 'build_habits' | 'learn_sustainability';
   climatePersona: string;
+  
+  // Audit-grade detailed inputs
+  isAuditGrade?: boolean;
+  commuteDistance?: number; // km per week
+  vehicleType?: 'petrol' | 'diesel' | 'hybrid' | 'electric' | 'none';
+  shortHaulFlights?: number; // flights per year
+  longHaulFlights?: number; // flights per year
+  electricityKwh?: number; // kWh per month
 }
 
 export interface FootprintProfile {
@@ -23,6 +31,8 @@ export interface FootprintProfile {
   wasteScore: number;
   monthlyEstimate: number; // Sum of the above in kg CO2e
   yearlyEstimate: number;  // monthly * 12
+  monthlyEstimateMin?: number; // range lower bound
+  monthlyEstimateMax?: number; // range upper bound
   lastUpdated: string;
 }
 

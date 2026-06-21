@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { UserProfile } from '../types';
 import { calculateBaseline, generateClimatePersona } from '../constants/emissions';
-import { Compass, Leaf, ArrowLeft, ArrowRight, User, Globe, Home, Trash2, Car, ShoppingBag, Eye, Check, RefreshCw } from 'lucide-react';
+import { Compass, Leaf, ArrowLeft, ArrowRight, User, Globe, Home, Trash2, Car, ShoppingBag, Eye, Check } from 'lucide-react';
 
 export const OnboardingFlow: React.FC = () => {
   const { completeOnboarding } = useApp();
@@ -20,6 +20,14 @@ export const OnboardingFlow: React.FC = () => {
   const [wasteHabits, setWasteHabits] = useState<'recycles_all' | 'recycles_some' | 'no_recycling'>('recycles_some');
   const [goalPreference, setGoalPreference] = useState<'save_money' | 'reduce_carbon' | 'build_habits' | 'learn_sustainability'>('reduce_carbon');
 
+  // Audit-grade state parameters
+  const [isAuditGrade, setIsAuditGrade] = useState<boolean>(false);
+  const [commuteDistance, setCommuteDistance] = useState<number>(120); // km per week
+  const [vehicleType, setVehicleType] = useState<'petrol' | 'diesel' | 'hybrid' | 'electric' | 'none'>('petrol');
+  const [shortHaulFlights, setShortHaulFlights] = useState<number>(2);
+  const [longHaulFlights, setLongHaulFlights] = useState<number>(1);
+  const [electricityKwh, setElectricityKwh] = useState<number>(250); // kWh/month
+
   // Calculates baseline on the fly for step 5 preview
   const getPreviewBaseline = () => {
     const tempProfile: UserProfile = {
@@ -34,7 +42,13 @@ export const OnboardingFlow: React.FC = () => {
       flightFrequency,
       wasteHabits,
       goalPreference,
-      climatePersona: 'Calculating...'
+      climatePersona: 'Calculating...',
+      isAuditGrade,
+      commuteDistance,
+      vehicleType,
+      shortHaulFlights,
+      longHaulFlights,
+      electricityKwh
     };
     const baseline = calculateBaseline(tempProfile);
     const persona = generateClimatePersona(tempProfile);
@@ -62,7 +76,13 @@ export const OnboardingFlow: React.FC = () => {
       flightFrequency,
       wasteHabits,
       goalPreference,
-      climatePersona: ''
+      climatePersona: '',
+      isAuditGrade,
+      commuteDistance,
+      vehicleType,
+      shortHaulFlights,
+      longHaulFlights,
+      electricityKwh
     };
     completeOnboarding(finalProfile);
   };
@@ -110,8 +130,41 @@ export const OnboardingFlow: React.FC = () => {
               Step 1: The Basics
             </h3>
             
+            {/* Quick vs Audit-Grade Selection */}
+            <div className="bg-stone-50 dark:bg-stone-950 p-4 rounded-xl border border-stone-200 dark:border-stone-850 space-y-2.5">
+              <span className="text-xs font-bold text-stone-500 uppercase tracking-wide block">Estimation Rigor Track</span>
+              <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Estimation Rigor Level">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={!isAuditGrade}
+                  onClick={() => setIsAuditGrade(false)}
+                  className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
+                    !isAuditGrade
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-stone-100 dark:bg-stone-850 text-stone-600 dark:text-stone-400 hover:bg-stone-200'
+                  }`}
+                >
+                  Quick Estimate (Template Averages)
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={isAuditGrade}
+                  onClick={() => setIsAuditGrade(true)}
+                  className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
+                    isAuditGrade
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-stone-100 dark:bg-stone-850 text-stone-600 dark:text-stone-400 hover:bg-stone-200'
+                  }`}
+                >
+                  Audit-Grade (Detailed Inputs)
+                </button>
+              </div>
+            </div>
+            
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide flex items-center gap-1">
+              <label htmlFor="input-onboarding-name" className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide flex items-center gap-1">
                 <User className="h-3.5 w-3.5" /> What is your name?
               </label>
               <input
@@ -126,7 +179,7 @@ export const OnboardingFlow: React.FC = () => {
 
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide flex items-center gap-1">
+                <label htmlFor="select-onboarding-region" className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide flex items-center gap-1">
                   <Globe className="h-3.5 w-3.5" /> Geographic Region
                 </label>
                 <select
@@ -145,7 +198,7 @@ export const OnboardingFlow: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide flex items-center gap-1">
+                <label htmlFor="select-onboarding-household" className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide flex items-center gap-1">
                   <Home className="h-3.5 w-3.5" /> Household Size
                 </label>
                 <select
@@ -163,10 +216,10 @@ export const OnboardingFlow: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
+              <span className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
                 Where is your home located?
-              </label>
-              <div className="grid gap-3 sm:grid-cols-3">
+              </span>
+              <div className="grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Home location context">
                 {[
                   { id: 'urban', val: 'Urban Center', desc: 'Apartment/dense grid' },
                   { id: 'suburban', val: 'Suburban Area', desc: 'Single-family house/commuter' },
@@ -174,12 +227,15 @@ export const OnboardingFlow: React.FC = () => {
                 ].map((item) => (
                   <button
                     key={item.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={lifestyleProfile === item.id}
                     id={`btn-onboarding-lifestyle-${item.id}`}
                     onClick={() => setLifestyleProfile(item.id as any)}
                     className={`flex flex-col items-center justify-center p-4 rounded-xl border text-center transition-all cursor-pointer ${
                       lifestyleProfile === item.id 
                         ? 'border-forest-600 bg-forest-50/50 text-forest-950 ring-2 ring-forest-100 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50' 
-                        : 'border-stone-200 hover:bg-stone-50 dark:border-stone-800'
+                        : 'border-stone-200 hover:bg-stone-50 dark:border-stone-800 text-stone-700 dark:text-stone-300'
                     }`}
                   >
                     <span className="font-semibold text-sm">{item.val}</span>
@@ -198,67 +254,159 @@ export const OnboardingFlow: React.FC = () => {
               Step 2: Commutes & Air Travels
             </h3>
 
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block flex items-center gap-1">
-                <Car className="h-3.5 w-3.5" /> What is your main method of daily transport?
-              </label>
-              
-              <div className="space-y-2.5">
-                {[
-                  { id: 'car_daily', label: 'Single Occupant Car (Daily)', desc: 'I drive to work or run errands by petrol/hybrid car almost every day.' },
-                  { id: 'car_occasional', label: 'Car (Occasional / Shared)', desc: 'I drive sometimes, share rides, or drive only on weekends.' },
-                  { id: 'public_transit', label: 'Public Transit (Bus, Train, Metro)', desc: 'I use trains, subways, or buses for the majority of my travel.' },
-                  { id: 'active_transit', label: 'Active Transport (Cycled, Walked, Skate)', desc: 'I cycle, walk, run, or utilize local active vehicles.' },
-                  { id: 'mixed', label: 'Mixed Hybrid commuting', desc: 'A balance of private driving, public rails, and walking.' }
-                ].map((opt) => (
-                  <button
-                    key={opt.id}
-                    id={`btn-onboarding-transport-${opt.id}`}
-                    onClick={() => setTransportHabits(opt.id as any)}
-                    className={`w-full flex items-start gap-3.5 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                      transportHabits === opt.id 
-                        ? 'border-forest-600 bg-forest-50/50 text-stone-900 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50' 
-                        : 'border-stone-200/70 hover:bg-stone-50/50 dark:border-stone-800'
-                    }`}
-                  >
-                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-stone-300 mt-0.5">
-                      {transportHabits === opt.id && <div className="h-2.5 w-2.5 rounded-full bg-forest-600 dark:bg-forest-400"></div>}
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-stone-900 dark:text-stone-100">{opt.label}</div>
-                      <p className="text-[11px] text-stone-400 dark:text-stone-400">{opt.desc}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
+            {isAuditGrade ? (
+              // Audit-grade Transport Section
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label htmlFor="input-onboarding-distance" className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
+                    Weekly Commute Distance: <span className="text-forest-600 dark:text-forest-400 font-mono font-bold">{commuteDistance} km</span>
+                  </label>
+                  <input
+                    id="input-onboarding-distance"
+                    type="range"
+                    min="0"
+                    max="800"
+                    step="10"
+                    value={commuteDistance}
+                    onChange={(e) => setCommuteDistance(Number(e.target.value))}
+                    className="w-full h-1.5 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-forest-600 dark:bg-stone-800"
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
-                How often do you take flights? (Short or long-haul)
-              </label>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  { id: 'frequent', label: 'Frequent Flying', desc: '4+ flights per year' },
-                  { id: 'occasional', label: 'Occasional Flyer', desc: '1 - 3 flights per year' },
-                  { id: 'rare_never', label: 'Rarely / Never', desc: 'Almost never fly' }
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    id={`btn-onboarding-flight-${item.id}`}
-                    onClick={() => setFlightFrequency(item.id as any)}
-                    className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all cursor-pointer ${
-                      flightFrequency === item.id 
-                        ? 'border-forest-600 bg-forest-50/50 text-forest-950 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50' 
-                        : 'border-stone-200 dark:border-stone-800'
-                    }`}
-                  >
-                    <span className="font-semibold text-xs leading-none">{item.label}</span>
-                    <span className="text-[10px] text-stone-400 mt-1 leading-tight">{item.desc}</span>
-                  </button>
-                ))}
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
+                    Primary Vehicle Engine Type
+                  </span>
+                  <div className="grid gap-2 sm:grid-cols-5" role="radiogroup" aria-label="Vehicle type">
+                    {[
+                      { id: 'petrol', val: 'Petrol / Gas' },
+                      { id: 'diesel', val: 'Diesel' },
+                      { id: 'hybrid', val: 'Hybrid' },
+                      { id: 'electric', val: 'Electric EV' },
+                      { id: 'none', val: 'No Car' }
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={vehicleType === item.id}
+                        onClick={() => setVehicleType(item.id as any)}
+                        className={`py-2.5 px-2 rounded-xl border text-center text-xs font-semibold transition-all cursor-pointer ${
+                          vehicleType === item.id
+                            ? 'border-forest-600 bg-forest-50/50 text-forest-950 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50'
+                            : 'border-stone-200 hover:bg-stone-50 dark:border-stone-800 text-stone-700 dark:text-stone-300'
+                        }`}
+                      >
+                        {item.val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label htmlFor="input-onboarding-shortflights" className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
+                      Short-Haul Flights per Year (&lt; 3hr): <span className="font-mono text-forest-600 dark:text-forest-400 font-bold">{shortHaulFlights}</span>
+                    </label>
+                    <input
+                      id="input-onboarding-shortflights"
+                      type="number"
+                      min="0"
+                      max="50"
+                      value={shortHaulFlights}
+                      onChange={(e) => setShortHaulFlights(Math.max(0, Number(e.target.value)))}
+                      className="w-full rounded-xl border border-stone-200 px-4 py-2 text-sm focus:border-forest-600 focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="input-onboarding-longflights" className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
+                      Long-Haul Flights per Year (&gt; 3hr): <span className="font-mono text-forest-600 dark:text-forest-400 font-bold">{longHaulFlights}</span>
+                    </label>
+                    <input
+                      id="input-onboarding-longflights"
+                      type="number"
+                      min="0"
+                      max="50"
+                      value={longHaulFlights}
+                      onChange={(e) => setLongHaulFlights(Math.max(0, Number(e.target.value)))}
+                      className="w-full rounded-xl border border-stone-200 px-4 py-2 text-sm focus:border-forest-600 focus:outline-hidden bg-stone-50 text-stone-900 dark:bg-stone-950 dark:border-stone-850 dark:text-stone-50"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              // Quick Template Transport
+              <div className="space-y-5">
+                <div className="space-y-3">
+                  <span className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block flex items-center gap-1">
+                    <Car className="h-3.5 w-3.5" /> What is your main method of daily transport?
+                  </span>
+                  
+                  <div className="space-y-2.5" role="radiogroup" aria-label="Primary daily transport method">
+                    {[
+                      { id: 'car_daily', label: 'Single Occupant Car (Daily)', desc: 'I drive to work or run errands by petrol/hybrid car almost every day.' },
+                      { id: 'car_occasional', label: 'Car (Occasional / Shared)', desc: 'I drive sometimes, share rides, or drive only on weekends.' },
+                      { id: 'public_transit', label: 'Public Transit (Bus, Train, Metro)', desc: 'I use trains, subways, or buses for the majority of my travel.' },
+                      { id: 'active_transit', label: 'Active Transport (Cycled, Walked, Skate)', desc: 'I cycle, walk, run, or utilize local active vehicles.' },
+                      { id: 'mixed', label: 'Mixed Hybrid commuting', desc: 'A balance of private driving, public rails, and walking.' }
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={transportHabits === opt.id}
+                        id={`btn-onboarding-transport-${opt.id}`}
+                        onClick={() => setTransportHabits(opt.id as any)}
+                        className={`w-full flex items-start gap-3.5 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                          transportHabits === opt.id 
+                            ? 'border-forest-600 bg-forest-50/50 text-stone-900 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50' 
+                            : 'border-stone-200/70 hover:bg-stone-50/50 dark:border-stone-800 text-stone-700 dark:text-stone-300'
+                        }`}
+                      >
+                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-stone-300 mt-0.5">
+                          {transportHabits === opt.id && <div className="h-2.5 w-2.5 rounded-full bg-forest-600 dark:bg-forest-400"></div>}
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-stone-900 dark:text-stone-100">{opt.label}</div>
+                          <p className="text-[11px] text-stone-400 dark:text-stone-400">{opt.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
+                    How often do you take flights? (Short or long-haul)
+                  </span>
+                  <div className="grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Flight frequency">
+                    {[
+                      { id: 'frequent', label: 'Frequent Flying', desc: '4+ flights per year' },
+                      { id: 'occasional', label: 'Occasional Flyer', desc: '1 - 3 flights per year' },
+                      { id: 'rare_never', label: 'Rarely / Never', desc: 'Almost never fly' }
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={flightFrequency === item.id}
+                        id={`btn-onboarding-flight-${item.id}`}
+                        onClick={() => setFlightFrequency(item.id as any)}
+                        className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                          flightFrequency === item.id 
+                            ? 'border-forest-600 bg-forest-50/50 text-forest-950 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50' 
+                            : 'border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300'
+                        }`}
+                      >
+                        <span className="font-semibold text-xs leading-none">{item.label}</span>
+                        <span className="text-[10px] text-stone-400 mt-1 leading-tight">{item.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -270,11 +418,11 @@ export const OnboardingFlow: React.FC = () => {
             </h3>
 
             <div className="space-y-3">
-              <label className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
+              <span className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
                 Which diet preference closest defines your meal habits?
-              </label>
+              </span>
               
-              <div className="grid gap-3 sm:grid-cols-5">
+              <div className="grid gap-3 sm:grid-cols-5" role="radiogroup" aria-label="Meal and diet habits">
                 {[
                   { id: 'meat_heavy', emoji: '🥩', label: 'Meat Heavy', desc: 'Frequent beef/lamb' },
                   { id: 'mixed', emoji: '🍗', label: 'Mixed', desc: 'Pork, poultry, fish' },
@@ -284,12 +432,15 @@ export const OnboardingFlow: React.FC = () => {
                 ].map((diet) => (
                   <button
                     key={diet.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={foodPreference === diet.id}
                     id={`btn-onboarding-diet-${diet.id}`}
                     onClick={() => setFoodPreference(diet.id as any)}
                     className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all cursor-pointer ${
                       foodPreference === diet.id 
-                        ? 'border-forest-600 bg-forest-50/50 text-emerald-950 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50' 
-                        : 'border-stone-200 dark:border-stone-850 hover:bg-stone-50'
+                        ? 'border-forest-600 bg-forest-50/50 text-emerald-950 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50 shadow-xs' 
+                        : 'border-stone-200 dark:border-stone-850 hover:bg-stone-50 text-stone-700 dark:text-stone-300'
                     }`}
                   >
                     <span className="text-2xl mb-1.5">{diet.emoji}</span>
@@ -300,38 +451,97 @@ export const OnboardingFlow: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-3 pt-2">
-              <label className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
-                How is your home energy grid and heating supplied?
-              </label>
-              
-              <div className="space-y-2">
-                {[
-                  { id: 'coal_gas', label: 'Carbon Heavy Grid (Coal / Natural Gas heating)', desc: 'Typical standard billing, fossil heating fuels used direct.' },
-                  { id: 'grid_avg', label: 'Average Public Grid mix', desc: 'Typical combination of gas, solar, hydro, nuclear, and wind.' },
-                  { id: 'green_renewables', label: '100% Green / Solar / Renewable contract', desc: 'I have household solar panels or pay for a specialized carbon-neutral energy vendor.' }
-                ].map((energy) => (
-                  <button
-                    key={energy.id}
-                    id={`btn-onboarding-energy-${energy.id}`}
-                    onClick={() => setHomeEnergy(energy.id as any)}
-                    className={`w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                      homeEnergy === energy.id 
-                        ? 'border-forest-600 bg-forest-50/50 text-stone-900 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50' 
-                        : 'border-stone-200 hover:bg-stone-50/50 dark:border-stone-800'
-                    }`}
-                  >
-                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-stone-300 mt-0.5">
-                      {homeEnergy === energy.id && <div className="h-2.5 w-2.5 rounded-full bg-forest-600 dark:bg-forest-400"></div>}
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-stone-900 dark:text-stone-100">{energy.label}</div>
-                      <p className="text-[11px] text-stone-400 dark:text-stone-400">{energy.desc}</p>
-                    </div>
-                  </button>
-                ))}
+            {isAuditGrade ? (
+              // Audit-grade Home Energy (actual kWh input)
+              <div className="space-y-4 pt-3">
+                <div className="space-y-2">
+                  <label htmlFor="input-onboarding-kwh" className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
+                    Average Monthly Electricity Usage: <span className="font-mono text-forest-600 dark:text-forest-400 font-bold">{electricityKwh} kWh</span>
+                  </label>
+                  <input
+                    id="input-onboarding-kwh"
+                    type="range"
+                    min="20"
+                    max="1500"
+                    step="10"
+                    value={electricityKwh}
+                    onChange={(e) => setElectricityKwh(Number(e.target.value))}
+                    className="w-full h-1.5 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-forest-600 dark:bg-stone-800"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
+                    Grid Contract Type
+                  </span>
+                  <div className="space-y-2" role="radiogroup" aria-label="Home grid energy supply">
+                    {[
+                      { id: 'coal_gas', label: 'Carbon Heavy Grid (Fossil-dominant)', desc: 'Standard power billing from standard coal-fired/gas thermal grids.' },
+                      { id: 'green_renewables', label: '100% Green / Solar / Clean contract', desc: 'Active solar array or renewable green grid certification contract.' }
+                    ].map((energy) => (
+                      <button
+                        key={energy.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={homeEnergy === energy.id}
+                        id={`btn-onboarding-energy-${energy.id}`}
+                        onClick={() => setHomeEnergy(energy.id as any)}
+                        className={`w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                          homeEnergy === energy.id 
+                            ? 'border-forest-600 bg-forest-50/50 text-stone-900 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50' 
+                            : 'border-stone-200 hover:bg-stone-50/50 dark:border-stone-800 text-stone-700 dark:text-stone-300'
+                        }`}
+                      >
+                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-stone-300 mt-0.5">
+                          {homeEnergy === energy.id && <div className="h-2.5 w-2.5 rounded-full bg-forest-600 dark:bg-forest-400"></div>}
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-stone-900 dark:text-stone-100">{energy.label}</div>
+                          <p className="text-[11px] text-stone-400 dark:text-stone-400">{energy.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              // Standard template grid energy
+              <div className="space-y-3 pt-2">
+                <span className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
+                  How is your home energy grid and heating supplied?
+                </span>
+                
+                <div className="space-y-2" role="radiogroup" aria-label="Home grid energy supply">
+                  {[
+                    { id: 'coal_gas', label: 'Carbon Heavy Grid (Coal / Natural Gas heating)', desc: 'Typical standard billing, fossil heating fuels used direct.' },
+                    { id: 'grid_avg', label: 'Average Public Grid mix', desc: 'Typical combination of gas, solar, hydro, nuclear, and wind.' },
+                    { id: 'green_renewables', label: '100% Green / Solar / Renewable contract', desc: 'I have household solar panels or pay for a specialized carbon-neutral energy vendor.' }
+                  ].map((energy) => (
+                    <button
+                      key={energy.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={homeEnergy === energy.id}
+                      id={`btn-onboarding-energy-${energy.id}`}
+                      onClick={() => setHomeEnergy(energy.id as any)}
+                      className={`w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        homeEnergy === energy.id 
+                          ? 'border-forest-600 bg-forest-50/50 text-stone-900 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50' 
+                          : 'border-stone-200 hover:bg-stone-50/50 dark:border-stone-800 text-stone-700 dark:text-stone-300'
+                      }`}
+                    >
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-stone-300 mt-0.5">
+                        {homeEnergy === energy.id && <div className="h-2.5 w-2.5 rounded-full bg-forest-600 dark:bg-forest-400"></div>}
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-stone-900 dark:text-stone-100">{energy.label}</div>
+                        <p className="text-[11px] text-stone-400 dark:text-stone-400">{energy.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -344,7 +554,7 @@ export const OnboardingFlow: React.FC = () => {
 
             <div className="grid gap-5 md:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block flex items-center gap-1">
+                <label htmlFor="select-onboarding-shopping" className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block flex items-center gap-1">
                   <ShoppingBag className="h-3.5 w-3.5" /> Shopping Appetite
                 </label>
                 <select
@@ -360,7 +570,7 @@ export const OnboardingFlow: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block flex items-center gap-1">
+                <label htmlFor="select-onboarding-waste" className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block flex items-center gap-1">
                   <Trash2 className="h-3.5 w-3.5" /> Recycling & Composting
                 </label>
                 <select
@@ -377,11 +587,11 @@ export const OnboardingFlow: React.FC = () => {
             </div>
 
             <div className="space-y-2.5 pt-2">
-              <label className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
+              <span className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wide block">
                 What is your central goal with Carbon Compass?
-              </label>
+              </span>
               
-              <div className="grid gap-3 sm:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-4" role="radiogroup" aria-label="Central footprint goal">
                 {[
                   { id: 'reduce_carbon', tag: '🌱', label: 'Cut Emissions', p: 'Maximum carbon saves' },
                   { id: 'save_money', tag: '💰', label: 'Save Money', p: 'Combined billing cuts' },
@@ -390,12 +600,15 @@ export const OnboardingFlow: React.FC = () => {
                 ].map((item) => (
                   <button
                     key={item.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={goalPreference === item.id}
                     id={`btn-onboarding-goal-${item.id}`}
                     onClick={() => setGoalPreference(item.id as any)}
                     className={`flex flex-col items-center justify-center p-3.5 rounded-xl border text-center transition-all cursor-pointer ${
                       goalPreference === item.id 
                         ? 'border-forest-600 bg-forest-50/50 text-forest-950 dark:border-forest-400 dark:bg-forest-950/20 dark:text-stone-50 shadow-xs' 
-                        : 'border-stone-200 hover:bg-stone-50 dark:border-stone-800'
+                        : 'border-stone-200 hover:bg-stone-50 dark:border-stone-800 text-stone-700 dark:text-stone-300'
                     }`}
                   >
                     <span className="text-xl mb-1">{item.tag}</span>
@@ -441,6 +654,11 @@ export const OnboardingFlow: React.FC = () => {
                     </span>
                     <span className="text-sm font-semibold text-stone-500">kg CO₂e</span>
                   </div>
+                  {baseline.monthlyEstimateMin && baseline.monthlyEstimateMax && (
+                    <span className="text-[10px] font-mono text-stone-400 block mt-1">
+                      Scientific Range: {baseline.monthlyEstimateMin} - {baseline.monthlyEstimateMax} kg (±12% margin)
+                    </span>
+                  )}
                 </div>
 
                 <div className="rounded-xl border border-stone-200 bg-stone-50 p-5 text-center dark:border-stone-800 dark:bg-stone-950">
@@ -490,15 +708,15 @@ export const OnboardingFlow: React.FC = () => {
                 </h5>
                 <ul className="text-xs text-stone-600 dark:text-stone-300 space-y-2 list-disc list-inside">
                   {baseline.transportScore > baseline.foodScore ? (
-                    <li>Your travel and flight logs are representing your highest carbon driver. Target public transits first!</li>
+                    <li>Your travel and flight logs represent your highest carbon driver. Target public transits first!</li>
                   ) : (
-                    <li>Meat-heavy food profiles rank highest in your layout. Target 2 vegan days to unlock significant shifts!</li>
+                    <li>Diet-based emissions rank highest in your layout. Target 2 vegan days to unlock significant shifts!</li>
                   )}
                   {baseline.homeScore > 300 && (
                     <li>Your cooling energy loads represent a high opportunity to switch A/C runtimes or wash cold laundry loads easily.</li>
                   )}
                   {baseline.wasteScore <= 50 ? (
-                    <li>Splendid! You represent an efficient waste recycler already limitng landfill decay.</li>
+                    <li>Splendid! You represent an efficient waste recycler already limiting landfill decay.</li>
                   ) : (
                     <li>Consider adding a home food composting habits bucket to save on decomposing local soil footprint.</li>
                   )}
@@ -514,6 +732,7 @@ export const OnboardingFlow: React.FC = () => {
       <div className="mt-8 flex items-center justify-between">
         {step > 1 ? (
           <button
+            type="button"
             id="btn-onboarding-back"
             onClick={handleBack}
             className="inline-flex items-center space-x-1.5 rounded-xl border border-stone-200 bg-white dark:bg-stone-900 px-5 py-3 text-sm font-semibold text-stone-700 dark:border-stone-850 dark:text-stone-300 hover:bg-stone-50 cursor-pointer"
@@ -527,6 +746,7 @@ export const OnboardingFlow: React.FC = () => {
 
         {step < 5 ? (
           <button
+            type="button"
             id="btn-onboarding-next"
             onClick={handleNext}
             className="inline-flex items-center space-x-1.5 rounded-xl bg-forest-600 px-6.5 py-3 text-sm font-bold text-white shadow-md hover:bg-forest-700 cursor-pointer ml-auto"
@@ -536,12 +756,13 @@ export const OnboardingFlow: React.FC = () => {
           </button>
         ) : (
           <button
+            type="button"
             id="btn-onboarding-complete"
             onClick={handleComplete}
             className="inline-flex items-center space-x-1.5 rounded-xl bg-emerald-600 px-7.5 py-3.5 text-sm font-bold text-white shadow-md shadow-emerald-600/10 hover:bg-emerald-700 cursor-pointer ml-auto hover:translate-y-[-1px] transition-all"
           >
             <span>Enter My Carbon Compass Dashboard</span>
-            <ArrowRight className="h-4.5 w-4.5 animate-bounce-horizontal" />
+            <ArrowRight className="h-4.5 w-4.5" />
           </button>
         )}
       </div>

@@ -377,8 +377,17 @@ export const MemeCenter: React.FC = () => {
           {/* Featured Card (Top banner) */}
           {featuredMeme && (activeFilter === 'all' || activeFilter === 'wholesome') && (
             <div 
+              role="button"
+              tabIndex={0}
+              aria-label={`Featured meme: ${featuredMeme.title}. Click to view details and scientific insights.`}
               onClick={() => setSelectedMeme(featuredMeme)}
-              className="group relative rounded-3xl border border-stone-200 dark:border-stone-850 bg-white dark:bg-stone-950 overflow-hidden cursor-pointer shadow-xl hover:border-emerald-500/30 dark:hover:border-emerald-500/30 transition-all duration-300"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedMeme(featuredMeme);
+                }
+              }}
+              className="group relative rounded-3xl border border-stone-200 dark:border-stone-850 bg-white dark:bg-stone-950 overflow-hidden cursor-pointer shadow-xl hover:border-emerald-500/30 dark:hover:border-emerald-500/30 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-emerald-500"
             >
               {/* Overlay category badge */}
               <div className="absolute top-5 left-5 z-20">
@@ -436,8 +445,17 @@ export const MemeCenter: React.FC = () => {
               {normalMemes.map(meme => (
                 <div 
                   key={meme.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Meme: ${meme.title}. Category: ${meme.category}. Click to view details and scientific insights.`}
                   onClick={() => setSelectedMeme(meme)}
-                  className="group relative rounded-3xl border border-stone-200 dark:border-stone-850 bg-white dark:bg-stone-950 p-4 cursor-pointer hover:border-emerald-500/25 dark:hover:border-emerald-500/25 transition-all duration-300 flex flex-col justify-between gap-4 shadow-lg hover:translate-y-[-2px]"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedMeme(meme);
+                    }
+                  }}
+                  className="group relative rounded-3xl border border-stone-200 dark:border-stone-850 bg-white dark:bg-stone-950 p-4 cursor-pointer hover:border-emerald-500/25 dark:hover:border-emerald-500/25 transition-all duration-300 flex flex-col justify-between gap-4 shadow-lg hover:translate-y-[-2px] focus-visible:ring-2 focus-visible:ring-emerald-500"
                 >
                   {/* Category Pill Tag */}
                   <div className="flex justify-between items-center z-10">

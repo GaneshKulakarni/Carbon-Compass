@@ -1,6 +1,6 @@
-import React from 'react';
-import { X, ShieldAlert, Compass, Globe, Info, Scale } from 'lucide-react';
-import { EMISSION_FACTORS } from '../constants/emissions';
+import React, { useEffect, useRef } from 'react';
+import { X, ShieldAlert, Globe, Scale } from 'lucide-react';
+import { EMISSION_FACTORS, EMISSION_FACTORS_METADATA } from '../constants/emissions';
 
 interface MethodologyModalProps {
   isOpen: boolean;
@@ -8,11 +8,65 @@ interface MethodologyModalProps {
 }
 
 export const MethodologyModal: React.FC<MethodologyModalProps> = ({ isOpen, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Keyboard focus trap & Escape key dismiss for accessibility (WCAG AA Compliance)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Save previous active element to restore later
+    const previousActive = document.activeElement as HTMLElement;
+
+    // Query all focusable tags
+    const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focusableElements = modalRef.current?.querySelectorAll(focusableSelector);
+    const firstElement = focusableElements?.[0] as HTMLElement;
+    const lastElement = focusableElements?.[focusableElements.length - 1] as HTMLElement;
+
+    if (firstElement) {
+      firstElement.focus();
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        if (e.shiftKey) { // Shift + Tab
+          if (document.activeElement === firstElement) {
+            lastElement?.focus();
+            e.preventDefault();
+          }
+        } else { // Tab
+          if (document.activeElement === lastElement) {
+            firstElement?.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      // Restore focus to button that opened it
+      if (previousActive) {
+        previousActive.focus();
+      }
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
       <div 
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="methodology-modal-title"
         className="relative w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-stone-900 border border-stone-100 dark:border-stone-800 animate-slide-up flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
         id="methodology-modal-container"
@@ -24,12 +78,13 @@ export const MethodologyModal: React.FC<MethodologyModalProps> = ({ isOpen, onCl
               <Scale className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-display font-bold text-stone-900 dark:text-stone-50">Calculation Methodology</h3>
+              <h3 id="methodology-modal-title" className="text-lg font-display font-bold text-stone-900 dark:text-stone-50">Calculation Methodology</h3>
               <p className="text-xs text-stone-500 dark:text-stone-400 font-mono mt-[-2px]">How we compute Carbon Compass metrics</p>
             </div>
           </div>
           <button 
             onClick={onClose} 
+            aria-label="Close calculation methodology modal"
             className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
           >
             <X className="h-5 w-5" />
@@ -180,6 +235,52 @@ export const MethodologyModal: React.FC<MethodologyModalProps> = ({ isOpen, onCl
               </ul>
             </div>
 
+            {/* Scientific Provenance Table */}
+            <div className="rounded-xl border border-stone-200/50 bg-stone-50/50 p-4 dark:border-stone-800 dark:bg-stone-900/50 md:col-span-2">
+              <h5 className="font-display font-semibold text-stone-900 dark:text-stone-50 flex items-center space-x-2 border-b border-stone-100 dark:border-stone-800 pb-2 mb-3">
+                <Globe className="h-4.5 w-4.5 text-forest-600 animate-pulse" />
+                <span>Unified Factor Provenance & Citation Ledger</span>
+              </h5>
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-[11px] text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-stone-200 dark:border-stone-850 text-stone-400 font-mono uppercase">
+                      <th className="py-2">Category</th>
+                      <th className="py-2">Coefficient Source Citation</th>
+                      <th className="py-2">Last Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-150 dark:divide-stone-850 text-stone-600 dark:text-stone-300 font-sans">
+                    <tr>
+                      <td className="py-2 font-bold">Transport (Petrol Cars)</td>
+                      <td className="py-2">{EMISSION_FACTORS_METADATA.transport.car_petrol.citation}</td>
+                      <td className="py-2 font-mono">{EMISSION_FACTORS_METADATA.transport.car_petrol.lastUpdated}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 font-bold">Transport (Transit / Bus)</td>
+                      <td className="py-2">{EMISSION_FACTORS_METADATA.transport.bus_or_train.citation}</td>
+                      <td className="py-2 font-mono">{EMISSION_FACTORS_METADATA.transport.bus_or_train.lastUpdated}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 font-bold">Diet (Beef / Lamb Meals)</td>
+                      <td className="py-2">{EMISSION_FACTORS_METADATA.food.beef_lamb.citation}</td>
+                      <td className="py-2 font-mono">{EMISSION_FACTORS_METADATA.food.beef_lamb.lastUpdated}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 font-bold">Home Grid Power (US/IN Average)</td>
+                      <td className="py-2">{EMISSION_FACTORS_METADATA.home.electricity_standard.citation}</td>
+                      <td className="py-2 font-mono">{EMISSION_FACTORS_METADATA.home.electricity_standard.lastUpdated}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 font-bold">Waste (Landfill Decay Bag)</td>
+                      <td className="py-2">{EMISSION_FACTORS_METADATA.waste.landfill_bag.citation}</td>
+                      <td className="py-2 font-mono">{EMISSION_FACTORS_METADATA.waste.landfill_bag.lastUpdated}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
           </div>
 
           <div className="border-t border-stone-100 dark:border-stone-800 pt-5 space-y-3">
@@ -199,7 +300,7 @@ export const MethodologyModal: React.FC<MethodologyModalProps> = ({ isOpen, onCl
           <button
             id="btn-methodology-dismiss"
             onClick={onClose}
-            className="rounded-xl bg-forest-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-forest-600/10 hover:bg-forest-700 transition-colors"
+            className="rounded-xl bg-forest-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-forest-600/10 hover:bg-forest-700 transition-colors cursor-pointer"
           >
             I Understand
           </button>

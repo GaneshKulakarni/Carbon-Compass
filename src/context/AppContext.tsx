@@ -42,9 +42,16 @@ interface AppContextProps {
   setUserTragedy: React.Dispatch<React.SetStateAction<TragedySlide | null>>;
   selectedFileBase64: string | null;
   setSelectedFileBase64: React.Dispatch<React.SetStateAction<string | null>>;
+  setBadges: React.Dispatch<React.SetStateAction<MilestoneBadge[]>>;
+  toast: { message: string; type: 'success' | 'info' | 'error' } | null;
+  showToast: (message: string, type?: 'success' | 'info' | 'error') => void;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
+
+export const AuthContext = createContext<any>(undefined);
+export const UserDataContext = createContext<any>(undefined);
+export const UIContext = createContext<any>(undefined);
 
 // Initial recommendations templates
 const RECOMMENDATIONS_TEMPLATES = [
@@ -163,7 +170,9 @@ const INITIAL_BADGES: MilestoneBadge[] = [
   { id: 'b_energy', title: 'Grid Champion', description: 'Perform 4 energy saving actions.', category: 'home', icon: '⚡' },
   { id: 'b_waste', title: 'Zero Waste Monk', description: 'Compost or recycle 10 times.', category: 'waste', icon: '♻️' },
   { id: 'b_saving_50', title: 'Planet Protector', description: 'Reduce over 50 kg of estimated carbon!', category: 'general', icon: '🌍' },
-  { id: 'b_truth_seeker', title: 'Truth Seeker', description: 'Debunk 3 myths or complete lessons in the Learn Hub.', category: 'general', icon: '🧠' }
+  { id: 'b_truth_seeker', title: 'Truth Seeker', description: 'Debunk 3 myths or complete lessons in the Learn Hub.', category: 'general', icon: '🧠' },
+  { id: 'b_grid_synced', title: 'Grid Sync Pioneer', description: 'Perform a live Indian grid utility audit.', category: 'home', icon: '📡' },
+  { id: 'b_net_zero', title: 'Net-Zero Pioneer', description: 'Offset your remaining carbon tax liabilities to net-zero.', category: 'general', icon: '🍃' }
 ];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -185,9 +194,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
 
-  const fetchUserData = async (uid: string) => {
+  // Custom Toast State
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+  const showToast = useCallback((message: string, type: 'success' | 'info' | 'error' = 'success') => {
+    setToast({ message, type });
+  }, []);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  const fetchUserData = async (uid: string, token: string) => {
     try {
-      const response = await fetch(`/api/user/data/${uid}`);
+      const response = await fetch(`/api/user/data/${uid}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         if (data.user) setUser(data.user);
@@ -216,13 +242,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Monitor Custom Auth changes via localStorage session check
   useEffect(() => {
     const savedUser = localStorage.getItem('cc_auth_user');
-    if (savedUser) {
+    const savedToken = localStorage.getItem('cc_auth_token');
+    if (savedUser && savedToken) {
       try {
         const parsed = JSON.parse(savedUser) as AuthUser;
         setAuthUser(parsed);
-        fetchUserData(parsed.uid);
+        fetchUserData(parsed.uid, savedToken);
       } catch (e) {
         localStorage.removeItem('cc_auth_user');
+        localStorage.removeItem('cc_auth_token');
         setAuthLoading(false);
       }
     } else {
@@ -247,13 +275,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const activeU = userState !== undefined ? userState : user;
     const activeLogs = logsState !== undefined ? logsState : activityLogs;
     const activeGoals = goalsState !== undefined ? goalsState : goals;
+    const token = localStorage.getItem('cc_auth_token');
 
-    if (authUser && activeU) {
+    if (authUser && activeU && token) {
       try {
         const response = await fetch('/api/user/sync', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             uid: authUser.uid,
@@ -292,17 +322,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         throw new Error(errMsg);
       }
-      const data = await response.json() as AuthUser;
-      setAuthUser(data);
-      localStorage.setItem('cc_auth_user', JSON.stringify(data));
+      const data = await response.json() as AuthUser & { token: string };
+      const authRecord: AuthUser = { uid: data.uid, email: data.email, displayName: data.displayName };
+      setAuthUser(authRecord);
+      localStorage.setItem('cc_auth_user', JSON.stringify(authRecord));
+      localStorage.setItem('cc_auth_token', data.token);
       setUser(null);
       setFootprint(null);
       setActivityLogs([]);
       setGoals([]);
       setActiveTab('onboarding');
+      showToast("Signed up successfully! Welcome to Carbon Compass.", "success");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to sign up';
       setAuthError(message);
+      showToast(message, "error");
       throw err;
     } finally {
       setAuthLoading(false);
@@ -328,13 +362,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         throw new Error(errMsg);
       }
-      const data = await response.json() as AuthUser;
-      setAuthUser(data);
-      localStorage.setItem('cc_auth_user', JSON.stringify(data));
-      await fetchUserData(data.uid);
+      const data = await response.json() as AuthUser & { token: string };
+      const authRecord: AuthUser = { uid: data.uid, email: data.email, displayName: data.displayName };
+      setAuthUser(authRecord);
+      localStorage.setItem('cc_auth_user', JSON.stringify(authRecord));
+      localStorage.setItem('cc_auth_token', data.token);
+      await fetchUserData(data.uid, data.token);
+      showToast("Welcome back to Carbon Compass!", "success");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to sign in';
       setAuthError(message);
+      showToast(message, "error");
       throw err;
     } finally {
       setAuthLoading(false);
@@ -346,15 +384,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       setAuthUser(null);
       localStorage.removeItem('cc_auth_user');
+      localStorage.removeItem('cc_auth_token');
       setUser(null);
       setFootprint(null);
       setActivityLogs([]);
       setGoals([]);
       setIsDemoMode(false);
       setActiveTab('landing');
+      showToast("Signed out successfully.", "info");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to sign out';
       setAuthError(message);
+      showToast(message, "error");
     }
   };
 
@@ -859,44 +900,78 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.clear();
   };
 
+  const authContextValue = React.useMemo(() => ({
+    authUser,
+    authError,
+    authLoading,
+    signUpEmail,
+    signInEmail,
+    signOut
+  }), [authUser, authError, authLoading]);
+
+  const uiContextValue = React.useMemo(() => ({
+    activeTab,
+    isDemoMode,
+    theme,
+    setTheme,
+    setActiveTab,
+    toast,
+    showToast
+  }), [activeTab, isDemoMode, theme, toast]);
+
+  const userDataContextValue = React.useMemo(() => ({
+    user,
+    footprint,
+    activityLogs,
+    goals,
+    recommendations,
+    badges,
+    completedLessons,
+    userTragedy,
+    selectedFileBase64,
+    syncDataToCloud,
+    completeOnboarding,
+    logActivity,
+    deleteLog,
+    addGoalFromRecommendation,
+    toggleGoalStatus,
+    logGoalProgress,
+    completeLesson,
+    resetAllData,
+    loadDemoMode,
+    setGoals,
+    setUserTragedy,
+    setSelectedFileBase64,
+    setBadges
+  }), [
+    user,
+    footprint,
+    activityLogs,
+    goals,
+    recommendations,
+    badges,
+    completedLessons,
+    userTragedy,
+    selectedFileBase64,
+    syncDataToCloud
+  ]);
+
+  const combinedValue = React.useMemo(() => ({
+    ...authContextValue,
+    ...uiContextValue,
+    ...userDataContextValue
+  }), [authContextValue, uiContextValue, userDataContextValue]);
+
   return (
-    <AppContext.Provider value={{
-      user,
-      footprint,
-      activityLogs,
-      goals,
-      recommendations,
-      badges,
-      activeTab,
-      isDemoMode,
-      theme,
-      completedLessons,
-      authUser,
-      authError,
-      authLoading,
-      signUpEmail,
-      signInEmail,
-      signOut,
-      syncDataToCloud,
-      setTheme,
-      setActiveTab,
-      completeOnboarding,
-      logActivity,
-      deleteLog,
-      addGoalFromRecommendation,
-      toggleGoalStatus,
-      logGoalProgress,
-      completeLesson,
-      resetAllData,
-      loadDemoMode,
-      setGoals,
-      userTragedy,
-      setUserTragedy,
-      selectedFileBase64,
-      setSelectedFileBase64
-    }}>
-      {children}
-    </AppContext.Provider>
+    <AuthContext.Provider value={authContextValue}>
+      <UserDataContext.Provider value={userDataContextValue}>
+        <UIContext.Provider value={uiContextValue}>
+          <AppContext.Provider value={combinedValue}>
+            {children}
+          </AppContext.Provider>
+        </UIContext.Provider>
+      </UserDataContext.Provider>
+    </AuthContext.Provider>
   );
 };
 
@@ -904,6 +979,30 @@ export const useApp = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
     throw new Error('useApp must be used within an AppProvider');
+  }
+  return context;
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export const useUserData = () => {
+  const context = useContext(UserDataContext);
+  if (context === undefined) {
+    throw new Error('useUserData must be used within a UserDataProvider');
+  }
+  return context;
+};
+
+export const useUI = () => {
+  const context = useContext(UIContext);
+  if (context === undefined) {
+    throw new Error('useUI must be used within a UIProvider');
   }
   return context;
 };

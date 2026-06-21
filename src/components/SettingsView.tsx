@@ -81,7 +81,7 @@ export const SettingsView: React.FC = () => {
           <div className="grid gap-4 sm:grid-cols-2">
             
             <div className="space-y-1">
-              <label className="font-bold text-stone-500 uppercase">My Profile Name</label>
+              <label htmlFor="settings-name-input" className="font-bold text-stone-500 uppercase">My Profile Name</label>
               <input
                 id="settings-name-input"
                 type="text"
@@ -93,7 +93,7 @@ export const SettingsView: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="font-bold text-stone-500 uppercase">Region / Location</label>
+              <label htmlFor="settings-region-select" className="font-bold text-stone-500 uppercase">Region / Location</label>
               <select
                 id="settings-region-select"
                 value={region}
@@ -110,7 +110,7 @@ export const SettingsView: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="font-bold text-stone-500 uppercase">Household Size</label>
+              <label htmlFor="settings-household-select" className="font-bold text-stone-500 uppercase">Household Size</label>
               <select
                 id="settings-household-select"
                 value={householdSize}
@@ -125,7 +125,7 @@ export const SettingsView: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="font-bold text-stone-500 uppercase font-sans">Diet Preference</label>
+              <label htmlFor="settings-food-select" className="font-bold text-stone-500 uppercase font-sans">Diet Preference</label>
               <select
                 id="settings-food-select"
                 value={food}
@@ -141,7 +141,7 @@ export const SettingsView: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="font-bold text-stone-500 uppercase">Utility Energy grid</label>
+              <label htmlFor="settings-energy-select" className="font-bold text-stone-500 uppercase">Utility Energy grid</label>
               <select
                 id="settings-energy-select"
                 value={energy}
@@ -155,7 +155,7 @@ export const SettingsView: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="font-bold text-stone-500 uppercase">Commutes type</label>
+              <label htmlFor="settings-transport-select" className="font-bold text-stone-500 uppercase">Commutes type</label>
               <select
                 id="settings-transport-select"
                 value={transport}

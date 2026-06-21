@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Goal } from '../types';
+import { EMISSION_FACTORS } from '../constants/emissions';
 import { TrendingDown, Sparkles, DollarSign, Calendar, ChevronRight, Award, Plus, Layers, Info, HelpCircle, Check } from 'lucide-react';
 
 export const WhatIfSimulator: React.FC = () => {
-  const { footprint, goals, setGoals, recommendations, addGoalFromRecommendation } = useApp();
+  const { footprint, goals, setGoals, recommendations, addGoalFromRecommendation, showToast } = useApp();
 
   // Habit Slider States
   const [commutesTv, setCommutesTv] = useState<number>(3);     // days per week commuting by transit/cycling
@@ -16,27 +17,25 @@ export const WhatIfSimulator: React.FC = () => {
   // Base metrics
   const baselineMonthly = footprint?.monthlyEstimate || 1200;
 
-  // Calculators logic per habit
-  // 1. Commute swaps: saves ~7.8 kg per day Swapped (calculated from standard car km baseline)
-  const commuteSavingMo = Math.round(commutesTv * 7.8 * 4.3); // 4.3 weeks per month
+  // Scientific, unified calculators logic derived directly from EMISSION_FACTORS
+  // 1. Commute swaps: Petrol Car (0.22 kg/km) vs Public Transit (0.04 kg/km) over a 43 km daily roundtrip
+  const commuteSavingMo = Math.round(commutesTv * (EMISSION_FACTORS.transport.car_petrol - EMISSION_FACTORS.transport.bus_or_train) * 43 * 4.3); 
   const commuteCostSavingMo = Math.round(commutesTv * 4.2 * 4.3); // Fuel saved in USD
 
-  // 2. Flight reduction: typical baseline occasionally is 200kg. Reduction based on flight frequency
-  const baseFlightMo = 150; // assumed avg flight load pro-rated
-  // Reducing flights saves ~70kg per flight skipped
-  const flightSavingMo = Math.round(Math.max(0, (4 - flightsYr) * 70));
+  // 2. Flight reduction: pro-rated savings by skipping yearly flights (flight_long = 850kg CO2e)
+  const flightSavingMo = Math.round(Math.max(0, (4 - flightsYr) * (EMISSION_FACTORS.transport.flight_long / 12)));
   const flightCostSavingMo = Math.round(Math.max(0, (4 - flightsYr) * 50));
 
-  // 3. Diet swaps: beef to veggies saves ~5.5kg per meal swapped
-  const dietSavingMo = Math.round(veggieDays * 5.5 * 4.3);
+  // 3. Diet swaps: beef/lamb (7.2 kg/serving) replaced with vegetarian (1.1 kg/serving)
+  const dietSavingMo = Math.round(veggieDays * (EMISSION_FACTORS.food.beef_lamb - EMISSION_FACTORS.food.vegetarian) * 4.3);
   const dietCostSavingMo = Math.round(veggieDays * 3.5 * 4.3);
 
-  // 4. Shopping cuts: saves 3.2kg per 10% reduction
-  const shoppingSavingMo = Math.round((shoppingReduction / 10) * 3.2);
+  // 4. Shopping cuts: saves clothing_item (12.5 kg/item) per pro-rated shopping scale
+  const shoppingSavingMo = Math.round((shoppingReduction / 10) * EMISSION_FACTORS.shopping.clothing_item * 0.25);
   const shoppingCostSavingMo = Math.round((shoppingReduction / 10) * 6.5);
 
-  // 5. AC offset: 1 degree saves ~15% of AC load (~28kg)
-  const acSavingMo = Math.round(acUsageTemp * 28);
+  // 5. AC offset: 1 degree saves 10% of high AC utility load (1.1 kg/hr over 8.5 hours daily)
+  const acSavingMo = Math.round(acUsageTemp * 0.10 * EMISSION_FACTORS.home.ac_cooling_hr * 8.5 * 30);
   const acCostSavingMo = Math.round(acUsageTemp * 15);
 
   // Totals calculations
@@ -61,7 +60,7 @@ export const WhatIfSimulator: React.FC = () => {
     };
 
     setGoals(prev => [customGoal, ...prev]);
-    alert(`Success: Turned custom habit "${title}" into an Active Goal! Tracking has started.`);
+    showToast(`Success: Turned custom habit "${title}" into an Active Goal! Tracking has started.`, "success");
   };
 
   return (
@@ -189,10 +188,10 @@ export const WhatIfSimulator: React.FC = () => {
             
             {/* Slider 1: Commutes */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs font-bold text-stone-700 dark:text-stone-300">
+              <label htmlFor="range-sim-commutes" className="flex justify-between items-center text-xs font-bold text-stone-700 dark:text-stone-300">
                 <span>🚲 Transit/Active Commute (days/week)</span>
                 <span className="font-mono text-forest-700 dark:text-forest-400">{commutesTv} days</span>
-              </div>
+              </label>
               <input
                 id="range-sim-commutes"
                 type="range"
@@ -200,6 +199,8 @@ export const WhatIfSimulator: React.FC = () => {
                 max="7"
                 value={commutesTv}
                 onChange={(e) => setCommutesTv(Number(e.target.value))}
+                aria-label="Transit or active commute days per week"
+                aria-valuetext={`${commutesTv} days per week`}
                 className="w-full h-1.5 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-forest-600 dark:bg-stone-800"
               />
               <div className="flex justify-between items-center text-[10px] text-stone-400">
@@ -210,10 +211,10 @@ export const WhatIfSimulator: React.FC = () => {
 
             {/* Slider 2: Veggie Days */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs font-bold text-stone-700 dark:text-stone-300">
+              <label htmlFor="range-sim-vegdays" className="flex justify-between items-center text-xs font-bold text-stone-700 dark:text-stone-300">
                 <span>🥗 Vegetarian/Vegan Meals (days/week)</span>
                 <span className="font-mono text-forest-700 dark:text-forest-400">{veggieDays} days</span>
-              </div>
+              </label>
               <input
                 id="range-sim-vegdays"
                 type="range"
@@ -221,6 +222,8 @@ export const WhatIfSimulator: React.FC = () => {
                 max="7"
                 value={veggieDays}
                 onChange={(e) => setVeggieDays(Number(e.target.value))}
+                aria-label="Vegetarian or vegan meals days per week"
+                aria-valuetext={`${veggieDays} days per week`}
                 className="w-full h-1.5 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-forest-600 dark:bg-stone-800"
               />
               <div className="flex justify-between items-center text-[10px] text-stone-400">
@@ -231,10 +234,10 @@ export const WhatIfSimulator: React.FC = () => {
 
             {/* Slider 3: Flights skipping */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs font-bold text-stone-700 dark:text-stone-300">
+              <label htmlFor="range-sim-flights" className="flex justify-between items-center text-xs font-bold text-stone-700 dark:text-stone-300">
                 <span>✈️ Yearly Long-Haul Trips</span>
                 <span className="font-mono text-forest-700 dark:text-forest-400">{flightsYr} flights</span>
-              </div>
+              </label>
               <input
                 id="range-sim-flights"
                 type="range"
@@ -242,6 +245,8 @@ export const WhatIfSimulator: React.FC = () => {
                 max="4"
                 value={flightsYr}
                 onChange={(e) => setFlightsYr(Number(e.target.value))}
+                aria-label="Yearly long haul flights"
+                aria-valuetext={`${flightsYr} flights per year`}
                 className="w-full h-1.5 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-forest-600 dark:bg-stone-800"
               />
               <div className="flex justify-between items-center text-[10px] text-stone-400">
@@ -252,10 +257,10 @@ export const WhatIfSimulator: React.FC = () => {
 
             {/* Slider 4: Online courier shipping reduction */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs font-bold text-stone-700 dark:text-stone-300">
+              <label htmlFor="range-sim-shopping" className="flex justify-between items-center text-xs font-bold text-stone-700 dark:text-stone-300">
                 <span>📦 Reduce Online retail deliveries (%)</span>
                 <span className="font-mono text-forest-700 dark:text-forest-400">{shoppingReduction}% cut</span>
-              </div>
+              </label>
               <input
                 id="range-sim-shopping"
                 type="range"
@@ -264,6 +269,8 @@ export const WhatIfSimulator: React.FC = () => {
                 max="90"
                 value={shoppingReduction}
                 onChange={(e) => setShoppingReduction(Number(e.target.value))}
+                aria-label="Online retail deliveries reduction percentage"
+                aria-valuetext={`${shoppingReduction} percent cut`}
                 className="w-full h-1.5 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-forest-600 dark:bg-stone-800"
               />
               <div className="flex justify-between items-center text-[10px] text-stone-400">
@@ -274,10 +281,10 @@ export const WhatIfSimulator: React.FC = () => {
 
             {/* Slider 5: Smart ac cooling temp */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs font-bold text-stone-700 dark:text-stone-300">
+              <label htmlFor="range-sim-actemp" className="flex justify-between items-center text-xs font-bold text-stone-700 dark:text-stone-300">
                 <span>🌡️ Thermostat temperature adjustment</span>
                 <span className="font-mono text-forest-700 dark:text-forest-400">+{acUsageTemp}°C higher</span>
-              </div>
+              </label>
               <input
                 id="range-sim-actemp"
                 type="range"
@@ -285,6 +292,8 @@ export const WhatIfSimulator: React.FC = () => {
                 max="4"
                 value={acUsageTemp}
                 onChange={(e) => setAcUsageTemp(Number(e.target.value))}
+                aria-label="Thermostat temperature adjustment degrees offset"
+                aria-valuetext={`plus ${acUsageTemp} degrees Celsius higher`}
                 className="w-full h-1.5 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-forest-600 dark:bg-stone-800"
               />
               <div className="flex justify-between items-center text-[10px] text-stone-400">

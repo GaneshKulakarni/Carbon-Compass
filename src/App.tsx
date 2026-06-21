@@ -18,8 +18,26 @@ import { AuthView } from './components/AuthView';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 function MainAppContent() {
-  const { user, activeTab, authUser, authLoading, isDemoMode } = useApp();
+  const { user, activeTab, authUser, authLoading, isDemoMode, toast } = useApp();
   const [isMethodologyOpen, setIsMethodologyOpen] = React.useState<boolean>(false);
+
+  // Dynamically update document.title based on the active tab for SEO & A11y
+  React.useEffect(() => {
+    const tabTitles: Record<string, string> = {
+      landing: 'Home',
+      dashboard: 'Dashboard',
+      tracker: 'Quick Tracker',
+      simulator: 'What-If Simulator',
+      goals: 'Goal Tracker',
+      community: 'Community Feed',
+      report: 'Weekly Report',
+      learn: 'Learn Hub',
+      memes: 'Eco-Meme Center',
+      settings: 'Settings'
+    };
+    const titleSuffix = tabTitles[activeTab] || 'Your Climate Path';
+    document.title = `Carbon Compass | ${titleSuffix}`;
+  }, [activeTab]);
 
   // Show a minimal skeleton while Firebase Auth is initializing.
   // This prevents a flash of the wrong page (e.g. LandingPage briefly
@@ -155,6 +173,20 @@ function MainAppContent() {
         isOpen={isMethodologyOpen}
         onClose={() => setIsMethodologyOpen(false)}
       />
+
+      {/* Floating toast notification */}
+      {toast && (
+        <div className={`fixed bottom-5 right-5 z-50 p-4 rounded-xl shadow-lg border text-xs font-bold font-sans flex items-center gap-2.5 animate-slide-up transition-all ${
+          toast.type === 'success' 
+            ? 'bg-emerald-600 text-white border-emerald-500 shadow-emerald-500/10' 
+            : toast.type === 'error' 
+            ? 'bg-red-650 text-white border-red-550 shadow-red-500/10' 
+            : 'bg-stone-850 text-white border-stone-750 dark:bg-stone-900 dark:border-stone-800'
+        }`}>
+          <span>{toast.type === 'success' ? '✓' : toast.type === 'error' ? '⚠' : 'ℹ'}</span>
+          <span>{toast.message}</span>
+        </div>
+      )}
     </div>
   );
 }

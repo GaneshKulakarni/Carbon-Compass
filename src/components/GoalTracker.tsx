@@ -423,7 +423,7 @@ export const GoalTracker: React.FC = () => {
 
             <form onSubmit={handleAddNewGoal} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wide block">Goal Title / Milestone Name</label>
+                <label htmlFor="input-new-goal-title" className="text-[10px] font-bold text-stone-400 uppercase tracking-wide block">Goal Title / Milestone Name</label>
                 <input
                   id="input-new-goal-title"
                   type="text"
@@ -438,7 +438,7 @@ export const GoalTracker: React.FC = () => {
               <div className="grid gap-3.5 sm:grid-cols-4">
                 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wide block">Category</label>
+                  <label htmlFor="select-new-goal-cat" className="text-[10px] font-bold text-stone-400 uppercase tracking-wide block">Category</label>
                   <select
                     id="select-new-goal-cat"
                     value={newCategory}
@@ -454,7 +454,7 @@ export const GoalTracker: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wide block">Monthly Target Occurrences</label>
+                  <label htmlFor="input-new-goal-target" className="text-[10px] font-bold text-stone-400 uppercase tracking-wide block">Monthly Target Occurrences</label>
                   <input
                     id="input-new-goal-target"
                     type="number"
@@ -466,7 +466,7 @@ export const GoalTracker: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wide block">Est. CO₂ Reduction (kg/mo)</label>
+                  <label htmlFor="input-new-goal-reduce" className="text-[10px] font-bold text-stone-400 uppercase tracking-wide block">Est. CO₂ Reduction (kg/mo)</label>
                   <input
                     id="input-new-goal-reduce"
                     type="number"
@@ -478,7 +478,7 @@ export const GoalTracker: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wide block">Est. Cash Saved ($/mo)</label>
+                  <label htmlFor="input-new-goal-save" className="text-[10px] font-bold text-stone-400 uppercase tracking-wide block">Est. Cash Saved ($/mo)</label>
                   <input
                     id="input-new-goal-save"
                     type="number"

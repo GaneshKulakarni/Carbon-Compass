@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { MongoClient, ObjectId } from "mongodb";
 import crypto from "crypto";
 import fs from "fs";
+import { z } from "zod";
 
 dotenv.config();
 
@@ -160,7 +161,7 @@ const getMongoDb = async () => {
   try {
     mongoClient = new MongoClient(mongoUri, { serverSelectionTimeoutMS: 2000 });
     await mongoClient.connect();
-    dbInstance = mongoClient.db();
+    dbInstance = mongoClient.db("carbon_compass");
     console.log("[carbon-compass] Connected to MongoDB database successfully!");
     return dbInstance;
   } catch (err) {
@@ -173,10 +174,160 @@ const getMongoDb = async () => {
 };
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 // Maximum payload size for handling base64 uploaded image files
 app.use(express.json({ limit: '10mb' }));
+
+// Simple in-memory rate limiter to prevent API cost explosions and spam
+const rateLimits = new Map<string, { count: number; resetTime: number }>();
+const rateLimitMiddleware = (limit: number, windowMs: number) => {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const ip = (req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || "unknown").toString();
+    const now = Date.now();
+    let record = rateLimits.get(ip);
+    if (!record || now > record.resetTime) {
+      record = { count: 0, resetTime: now + windowMs };
+    }
+    record.count++;
+    rateLimits.set(ip, record);
+    if (record.count > limit) {
+      return res.status(429).json({ error: "Too many requests. Please try again later." });
+    }
+    next();
+  };
+};
+
+// Secure signed tokens (JWT-like) to protect user endpoints
+const JWT_SECRET = process.env.JWT_SECRET || "carbon-compass-secret-key-987654321";
+function generateToken(payload: { uid: string; email: string }) {
+  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
+  const payloadStr = Buffer.from(JSON.stringify({ ...payload, exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60 })).toString("base64url");
+  const signature = crypto.createHmac("sha256", JWT_SECRET).update(`${header}.${payloadStr}`).digest("base64url");
+  return `${header}.${payloadStr}.${signature}`;
+}
+
+function verifyToken(token: string): { uid: string; email: string } | null {
+  try {
+    const [header, payloadStr, signature] = token.split(".");
+    if (!header || !payloadStr || !signature) return null;
+    const expectedSignature = crypto.createHmac("sha256", JWT_SECRET).update(`${header}.${payloadStr}`).digest("base64url");
+    if (signature !== expectedSignature) return null;
+    const payload = JSON.parse(Buffer.from(payloadStr, "base64url").toString("utf-8"));
+    if (payload.exp && payload.exp < Date.now() / 1000) return null;
+    return payload;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Cookie parser utility for secure cookieless trust anchor integration
+const parseCookies = (cookieHeader: string) => {
+  const list: Record<string, string> = {};
+  if (!cookieHeader) return list;
+  cookieHeader.split(';').forEach(cookie => {
+    const parts = cookie.split('=');
+    list[parts.shift()!.trim()] = decodeURI(parts.join('='));
+  });
+  return list;
+};
+
+// Middleware to verify auth headers or secure cookies and enforce server-side user checks
+const authenticateToken = (req: any, res: express.Response, next: express.NextFunction) => {
+  let token = null;
+  const authHeader = req.headers['authorization'];
+  
+  if (authHeader && authHeader.split(' ')[1]) {
+    token = authHeader.split(' ')[1];
+  } else if (req.headers.cookie) {
+    const cookies = parseCookies(req.headers.cookie);
+    token = cookies['session_token'];
+  }
+
+  if (!token) return res.status(401).json({ error: "Access denied. No session token provided." });
+  const decoded = verifyToken(token);
+  if (!decoded) return res.status(403).json({ error: "Invalid or expired session token." });
+  req.user = decoded;
+  next();
+};
+
+// Zod schemas for strict request body validations
+const SignupSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  name: z.string().min(1)
+});
+
+const SigninSchema = z.object({
+  email: z.string().email(),
+  password: z.string()
+});
+
+const FootprintSchema = z.object({
+  transportScore: z.number(),
+  foodScore: z.number(),
+  homeScore: z.number(),
+  shoppingScore: z.number(),
+  wasteScore: z.number(),
+  monthlyEstimate: z.number(),
+  yearlyEstimate: z.number(),
+  monthlyEstimateMin: z.number().optional(),
+  monthlyEstimateMax: z.number().optional(),
+  lastUpdated: z.string().optional()
+}).nullable();
+
+const UserProfileSchema = z.object({
+  name: z.string(),
+  region: z.string(),
+  householdSize: z.number(),
+  lifestyleProfile: z.enum(['urban', 'suburban', 'rural']),
+  transportHabits: z.enum(['car_daily', 'car_occasional', 'public_transit', 'active_transit', 'mixed']),
+  foodPreference: z.enum(['meat_heavy', 'mixed', 'low_meat', 'vegetarian', 'vegan']),
+  homeEnergy: z.enum(['coal_gas', 'grid_avg', 'green_renewables']),
+  shoppingHabits: z.enum(['frequent', 'average', 'minimalist']),
+  flightFrequency: z.enum(['frequent', 'occasional', 'rare_never']),
+  wasteHabits: z.enum(['recycles_all', 'recycles_some', 'no_recycling']),
+  goalPreference: z.enum(['save_money', 'reduce_carbon', 'build_habits', 'learn_sustainability']),
+  climatePersona: z.string(),
+  
+  isAuditGrade: z.boolean().optional(),
+  commuteDistance: z.number().optional(),
+  vehicleType: z.enum(['petrol', 'diesel', 'hybrid', 'electric', 'none']).optional(),
+  shortHaulFlights: z.number().optional(),
+  longHaulFlights: z.number().optional(),
+  electricityKwh: z.number().optional()
+});
+
+const SyncSchema = z.object({
+  uid: z.string(),
+  user: UserProfileSchema,
+  footprint: FootprintSchema,
+  activityLogs: z.array(z.any()),
+  goals: z.array(z.any())
+});
+
+const PostSchema = z.object({
+  authorName: z.string().optional(),
+  authorEmail: z.string().optional(),
+  habitTitle: z.string().min(1),
+  category: z.string().optional(),
+  impactKg: z.number().optional(),
+  content: z.string().min(1),
+  likes: z.number().optional(),
+  createdAt: z.string().optional()
+});
+
+// HTML Sanitizer to prevent XSS in community posts
+const sanitizeInput = (str: any) => {
+  if (typeof str !== "string") return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;")
+    .replace(/\//g, "&#x2F;");
+};
 
 // Basic security headers
 app.use((_req, res, next) => {
@@ -199,7 +350,7 @@ const getGenAIClient = () => {
 };
 
 // Real-time analysis of uploaded ecological scars using multimodal Gemini 3.5 Flash
-app.post("/api/gemini/analyze-scar", async (req, res) => {
+app.post("/api/gemini/analyze-scar", rateLimitMiddleware(5, 60000), async (req, res) => {
   try {
     const { imageBase64, mimeType } = req.body;
     
@@ -264,7 +415,7 @@ app.post("/api/gemini/analyze-scar", async (req, res) => {
 });
 
 // Generate Custom Eco-Sustainability Meme using Gemini 3.5 Flash server-side
-app.post("/api/gemini/generate-meme", async (req, res) => {
+app.post("/api/gemini/generate-meme", rateLimitMiddleware(10, 60000), async (req, res) => {
   try {
     const { topic } = req.body;
     // Sanitize input: strip non-printable/special chars, enforce max length
@@ -346,27 +497,29 @@ app.post("/api/gemini/generate-meme", async (req, res) => {
   }
 });
 
-// Hashing utilities for custom credentials authentication
+// Hashing utilities for custom credentials authentication (hardened PBKDF2 iterations to 220,000)
 const hashPassword = (password: string) => {
   const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
+  const hash = crypto.pbkdf2Sync(password, salt, 220000, 64, "sha512").toString("hex");
   return `${salt}:${hash}`;
 };
 
 const verifyPassword = (password: string, storedValue: string) => {
   if (!storedValue || !storedValue.includes(":")) return false;
   const [salt, originalHash] = storedValue.split(":");
-  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
+  const hash = crypto.pbkdf2Sync(password, salt, 220000, 64, "sha512").toString("hex");
   return hash === originalHash;
 };
 
-// Custom credentials auth: Signup
-app.post("/api/auth/signup", async (req, res) => {
+// Custom credentials auth: Signup (rate limited & schema validated)
+app.post("/api/auth/signup", rateLimitMiddleware(10, 60000), async (req, res) => {
   try {
-    const { email, password, name } = req.body;
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: "Missing email, password, or name" });
+    const parseResult = SignupSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      return res.status(400).json({ error: parseResult.error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(", ") });
     }
+
+    const { email, password, name } = parseResult.data;
 
     const database = await getMongoDb();
     const credentialsCollection = database.collection("credentials");
@@ -388,10 +541,21 @@ app.post("/api/auth/signup", async (req, res) => {
       createdAt: new Date().toISOString()
     });
 
+    const token = generateToken({ uid, email: email.toLowerCase().trim() });
+
+    // Set secure HttpOnly cookie for session tracking
+    res.cookie("session_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     res.json({
       uid,
       email: email.toLowerCase().trim(),
-      displayName: name.trim()
+      displayName: name.trim(),
+      token
     });
   } catch (error: unknown) {
     console.error("Signup error:", error);
@@ -400,13 +564,15 @@ app.post("/api/auth/signup", async (req, res) => {
   }
 });
 
-// Custom credentials auth: Signin
-app.post("/api/auth/signin", async (req, res) => {
+// Custom credentials auth: Signin (rate limited & schema validated)
+app.post("/api/auth/signin", rateLimitMiddleware(20, 60000), async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: "Missing email or password" });
+    const parseResult = SigninSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      return res.status(400).json({ error: parseResult.error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(", ") });
     }
+
+    const { email, password } = parseResult.data;
 
     const database = await getMongoDb();
     const credentialsCollection = database.collection("credentials");
@@ -416,10 +582,21 @@ app.post("/api/auth/signin", async (req, res) => {
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
+    const token = generateToken({ uid: userRecord.uid, email: userRecord.email });
+
+    // Set secure HttpOnly cookie for session tracking
+    res.cookie("session_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     res.json({
       uid: userRecord.uid,
       email: userRecord.email,
-      displayName: userRecord.name
+      displayName: userRecord.name,
+      token
     });
   } catch (error: unknown) {
     console.error("Signin error:", error);
@@ -428,12 +605,19 @@ app.post("/api/auth/signin", async (req, res) => {
   }
 });
 
-// Sync user footprint data to MongoDB
-app.post("/api/user/sync", async (req, res) => {
+// Sync user footprint data to MongoDB (authenticated + identity verified + schema validated)
+app.post("/api/user/sync", authenticateToken, async (req: any, res) => {
   try {
-    const { uid, user, footprint, activityLogs, goals } = req.body;
-    if (!uid) {
-      return res.status(400).json({ error: "Missing uid parameter" });
+    const parseResult = SyncSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      return res.status(400).json({ error: parseResult.error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(", ") });
+    }
+
+    const { uid, user, footprint, activityLogs, goals } = parseResult.data;
+
+    // Verify token matches the uid requested
+    if (req.user.uid !== uid) {
+      return res.status(403).json({ error: "Unauthorized. Token UID does not match request body UID." });
     }
 
     const database = await getMongoDb();
@@ -463,12 +647,17 @@ app.post("/api/user/sync", async (req, res) => {
   }
 });
 
-// Load user footprint data from MongoDB
-app.get("/api/user/data/:uid", async (req, res) => {
+// Load user footprint data from MongoDB (authenticated + identity verified)
+app.get("/api/user/data/:uid", authenticateToken, async (req: any, res) => {
   try {
     const { uid } = req.params;
     if (!uid) {
       return res.status(400).json({ error: "Missing uid parameter" });
+    }
+
+    // Verify token matches the uid requested
+    if (req.user.uid !== uid) {
+      return res.status(403).json({ error: "Unauthorized. Token UID does not match requested route UID." });
     }
 
     const database = await getMongoDb();
@@ -518,25 +707,27 @@ app.get("/api/posts", async (req, res) => {
   }
 });
 
-// Create a new community post in MongoDB
-app.post("/api/posts", async (req, res) => {
+// Create a new community post in MongoDB (rate limited & input sanitized & schema validated)
+app.post("/api/posts", rateLimitMiddleware(15, 60000), async (req, res) => {
   try {
-    const { authorName, authorEmail, habitTitle, category, impactKg, content, likes, createdAt } = req.body;
-    if (!habitTitle || !content) {
-      return res.status(400).json({ error: "Missing habitTitle or content" });
+    const parseResult = PostSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      return res.status(400).json({ error: parseResult.error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(", ") });
     }
+
+    const { authorName, authorEmail, habitTitle, category, impactKg, content, likes, createdAt } = parseResult.data;
 
     const database = await getMongoDb();
     const collection = database.collection("posts");
     
     const newPostData = {
-      authorName,
-      authorEmail,
-      habitTitle,
-      category,
-      impactKg,
-      content,
-      likes: likes || 0,
+      authorName: sanitizeInput(authorName || "Anonymous"),
+      authorEmail: sanitizeInput(authorEmail || ""),
+      habitTitle: sanitizeInput(habitTitle),
+      category: sanitizeInput(category || "general"),
+      impactKg: Number(impactKg) || 0,
+      content: sanitizeInput(content),
+      likes: Number(likes) || 0,
       createdAt: createdAt || new Date().toISOString()
     };
 
@@ -595,4 +786,8 @@ async function setupServer() {
   });
 }
 
-setupServer();
+if (process.env.NODE_ENV !== "test" && !process.env.VITEST) {
+  setupServer();
+}
+
+export { app, getMongoDb };
