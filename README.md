@@ -1,113 +1,163 @@
-# Carbon Compass 🧭🌱
+# 🧭 Carbon Compass: Premium Sustainability Ledger & WebGL Earth Twin
 
-Carbon Compass is an award-winning, premium personal sustainability coach designed to help individuals understand, track, and reduce their carbon footprint through practical everyday actions, live simulations, and gamified progress tracking. 
+Carbon Compass is an award-winning, professional personal sustainability ledger designed to replace climate paralysis with localized, tangible agency. The application blends **real-time AI analytics**, **interactive WebGL graphics**, and **lifecycle carbon mathematics** to help individuals understand, simulate, and reduce their environmental footprint.
 
-Built with **React 19**, **Vite 6**, **Tailwind CSS v4**, **TypeScript**, and **Motion**, Carbon Compass completely abandons pre-packaged slop and guilt-heavy doomsday design patterns, replacing them with custom display typography, off-white neutral grids, interactive SVG visualizations, and helpful mentoring.
-
----
-
-## 🚀 Live Features Implemented
-
-### 1. Human-Centric Ecological Exhibition Landing Page
-*   **"Confronting Our Scars" Exhibition**: An organic, statefully animated gallery of the five physical environmental tragedies you uploaded. Renders rich, curated backdrops detailing marine plastic strangulation (plastic glove clownfish), industrial dualism memory, climate cities space, plastic sea swimmers, and endless landfills.
-*   **Emotional Narrative & Motive**: Describes our mission in a raw, editorial voice that avoids mechanical robotic styling to spark actionable, customized agency.
-*   **The "Cost vs. Healing" Interactive Split**: A high-impact contrast panel where the audience can toggle between raw structural environmental scars and **The Restorative 3D Globe View**—showing how habit logging directly heals a digital twin earth model in real-time.
-*   **Top Sustainability Research Citations**: Deep typographic references to peer-reviewed climate data organizations on the web, including direct portals for **Project Drawdown**, **WWF**, **World Resources Institute**, **Earthday Network**, and **UN Climate Change (UNFCCC)**.
-*   **Minimalist Interactive FAQ**: Immersive paper-textured accordions answering foundational client queries on data sovereignty and calculation systems.
-
-### 2. Painless Visual Onboarding
-*   **Custom Questionnaire Cards:** Guides users step-by-step through geographic regions, household sizes, transport methods, flights, and dietary habits with sliders and custom button arrays.
-*   **Live Emissions Baseline:** Instantly solves onboarding parameters upon completion, identifying categories with high carbon weights (using international GHG protocol indexes) and printing a custom **Climate Persona** (e.g., *Conscious Eater* or *Transit Hero*).
-
-### 3. Personal Climate Dashboard
-*   **Carbon Budget Gauge:** Calculates real-time actual footprint compared to the onboarding baseline. The circular gauge automatically shifts as you log actions or delete historical entries.
-*   **Dynamic Savings Summary:** Staggered visual segments represent actual emissions relative to carbon savings logged.
-*   **Priority Insights:** Displays highlights on your highest footprint categoric driver and recommends immediate, tailored switches.
-
-### 4. Daily Progress Log (Quick Carbon Tracker)
-*   **1-Click Presets:** Log common daily sustainability habits (e.g., *Worked from Home*, *Plant-Based Meals*, *Cold Laundry washing*) instantly with one tap to watch savings update.
-*   **Precise Manual Ledger:** Diagnostic dropdown console to input custom quantities and describe logs with optional memo fields.
-*   **Historical Activity Ledger:** Interactive datatable displaying active recordings, categories, and dates. It supports quick rollback deletions.
-
-### 5. What-If Habit Simulator
-*   **Dynamic Sliders:** Tweak daily commuting distances, yearly flight ratios, dietary choices, and thermostat thresholds to forecast cumulative greenhouse gas adjustments.
-*   **Budgeting Estimator:** Previews annual carbon cuts, billing savings in USD, and pro-rated equivalents, such as trees planted and percentage footprint savings.
-*   **Action Plan Matrices:** Lists impact-vs-effort recommendation boards, permitting users to convert a habit directly into active dashboard tracker goals with a single click.
-
-### 6. Badges & Habits Cabinet
-*   **Goal Tracking Checklist:** Live tracker checklists allowing users to log incremental completions of goals (e.g., "Wash laundry on cold") to accumulate hot streaks!
-*   **Dynamic Achievement Progress Tracks:** Displays real-time progress bars (e.g., `4/10 meals`, `40%`) that immediately recalculate and animate whenever habits, logs, streaks, or lessons change, providing visual milestones prior to unlocking badges.
-*   **Badge Trophy Shelf:** Interlocking accomplishment triggers that award specific badges (as you log behaviors) like *First Log*, *Transit Hero*, *Zero Waste Monk*, or *Planet Protector*!
-
-### 7. Weekly Compliance Reports
-*   **Screenshot Share Card:** Generates a custom, high-contrast, screenshot-ready badge summary consisting of validation tags that judges can snapshot during demo presentations.
-*   **Real-World Sharing Suite:** Fully operational sharing features including direct social broadcasting to **LinkedIn**, **WhatsApp**, and **Email**; a One-Click ready-to-paste copied snippet generator; a smart Mobile Share API wrapper; and a downloadable verified climate certificate receipt (`.txt` formatted with cryptographic-style validation tags).
-
-### 8. Sandbox Control Room (Demo Mode)
-*   **One-Click Judge Seeding:** Instant seed trigger representing **"Alex"** (busy urban professional) that instantaneously populates active gauges, historical activity lists, logged saves, and goals, bypassing tedious typing during reviews!
+Built using a unified modern stack: **React 19**, **Vite 6**, **TypeScript**, **Three.js (WebGL)**, **Express**, **MongoDB**, **Tailwind CSS v4**, and **Gemini 3.5 Flash**.
 
 ---
 
-## 🛠️ Architecture Summary
+## 📐 System Architecture
 
-We operate inside a modular folder skeleton designed for clean separation of concerns:
+The application runs as a unified Monorepo. During development, it hosts a combined Vite development server. In production, it builds the React client into a single static directory served by a long-running Node/Express server.
 
-`src/types.ts`
-Holds all key TypeScript data interfaces (`UserProfile`, `FootprintProfile`, `ActivityLog`, `Goal`, `Recommendation`, `MilestoneBadge`).
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User Browser
+    participant React as React Client (Vite SPA)
+    participant Express as Express Server (Node.js)
+    participant MongoDB as MongoDB Database (Local Fallback)
+    participant Gemini as Gemini 3.5 Flash (Google AI)
 
-`src/constants/emissions.ts`
-Stores transparent, central emissions configurations in kilograms of CO₂e per unit, plus baseline geographic projection data (compiled from GHG Protocol and global registries).
+    User->>React: Browse & Interact (Logs, Checklist, Sliders)
+    React->>User: Update WebGL Globe Mesh (Red -> Green)
+    
+    rect rgb(20, 30, 20)
+        Note over User, Gemini: Multimodal Scar Analysis
+        User->>React: Upload local photo of ecological scar
+        React->>Express: POST /api/gemini/analyze-scar (Base64 + Mime)
+        Express->>Gemini: generateContent (multimodal image prompt)
+        Gemini-->>Express: Return structured Museum Card JSON
+        Express-->>React: Send conservation details & calibrated stats
+    end
 
-`src/context/AppContext.tsx`
-Orchestrates global application states locally via high-performance React Context. Auto-persists tracking logs, goals, and badges inside your browser's secure `localStorage` to preserve offline state sovereignty.
+    rect rgb(30, 20, 25)
+        Note over User, Gemini: Eco-Meme Vault
+        User->>React: Request meme joke on custom topic
+        React->>Express: POST /api/gemini/generate-meme
+        Express->>Gemini: generateContent (meme templates: bus, beach, soldiers)
+        Gemini-->>Express: Return meme captions & educational science fact
+        Express-->>React: Send template JSON
+        React->>User: Render styled text overlays over local image templates
+    end
 
-`src/components/`
-Modular, single-responsibility components with strict visual alignments:
-*   `Navbar.tsx` & `Footer.tsx` (sticky layout frame)
-*   `LandingPage.tsx` (hero, stats, collapsible FAQ)
-*   `OnboardingFlow.tsx` (calculates and previews custom baselines)
-*   `DashboardHome.tsx` (main cockpit with responsive SVG indicators)
-*   `QuickTracker.tsx` (presets panel and manual input form)
-*   `WhatIfSimulator.tsx` (matrix widgets and habit planning sliders)
-*   `GoalTracker.tsx` (checklist counters and badge shelf)
-*   `LearnHub.tsx` (Myth vs Fact toggle cards)
-*   `WeeklyReport.tsx` (filter logs for last 7 days + printable preview mockup)
-*   `SettingsView.tsx` (onboarding tweaks + hard reset + seed triggers)
-*   `MethodologyModal.tsx` (technical definitions overlay)
-
----
-
-## 🚀 Setup & Launch Instructions
-
-To launch Carbon Compass locally:
-
-1.  **Clone / Download** this applet codebase.
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Set up environment variables:
-    - Copy `.env.example` to a new file named `.env` in the project root:
-      ```bash
-      cp .env.example .env
-      ```
-    - Open `.env` and set your `GEMINI_API_KEY` (e.g., from Google AI Studio). This enables server-side Gemini AI features (Meme Center and Image Upload Scan).
-4.  Boot dev server:
-    ```bash
-    npm run dev
-    ```
-5.  Compile for production:
-    ```bash
-    npm run build
-    ```
+    rect rgb(20, 25, 30)
+        Note over User, MongoDB: Database Synchronization
+        React->>Express: POST /api/user/sync (Footprint, Logs, Goals)
+        Express->>MongoDB: Connect and Upsert User Record
+        Note over Express, MongoDB: Fallback to local JSON files if connection fails
+        MongoDB-->>Express: Sync Success
+        Express-->>React: Response OK
+    end
+```
 
 ---
 
-## 🔌 API Integration Plugs & Future Roadmap
+## 🌟 Core High-Fidelity Features
 
-Carbon Compass is fully decoupled from local mocking, ready to scale into a venture-backed MVP:
+### 1. Multimodal Gemini AI Ecological Scanner
+*   **Real-time Image Analysis:** Users upload a photo of a local environmental issue (e.g. plastic film, industrial chimney).
+*   **AI Museum Card Curation:** Backend passes the base64 buffer to Gemini 3.5 Flash, generating a structured, poignant museum card complete with a poetic description, ecological significance, motivational warning quote, and realistic metrics.
+*   **Offline Preservation Fallback:** In the event of API rate limits or network issues, the system offers **Offline Scientific Presets** (Plastics, Industrial Plumes, Trash Landfill, Urban Heat) ensuring the UI remains 100% operational.
 
-1.  **Smart Utility Meters Integration:** Access electrical consumption data by plugging in the **Mercury / Green Button API** inside the home energy calculation functions to ingest actual utility workloads.
-2.  **Transportation OAuth Trackers:** Hook into wearable devices or public systems (e.g., **Strava API**, **Google Fit API**, **Uber API**, or transits **GTFS feeds**) to automatically log cycling distances or bus commutes inside the activity ledger.
-3.  **Real-time AI Recommendations:** Connect the server-side routes to the standard **Gemini API** on the backend using the `@google/genai` TypeScript SDK to generate highly complex, contextual action plans based on real city weather patterns or consumption spikes.
-4.  **Database Expansion:** Move browser `localStorage` inputs to **Supabase** or **Firebase Firestore** using our modular Context dispatch hooks in under 30 minutes!
+### 2. WebGL 3D Restorative Globe Twin
+*   **Interactive Earth Grid:** Implements a custom 3D WebGL Earth model using Three.js, responding dynamically to user logs.
+*   **Visual Restoration Feedback:** As users log carbon offsets (e.g., swapping car commutes, choosing plant-based meals), a real-time restoration algorithm shifts the globe's mesh colors from warning heat-red (representing global warming) back to flourishing green.
+*   **Bundle Optimization:** Defer-loads the heavy ~400KB Three.js package using React lazy-loading (`React.lazy()`) and `Suspense` containers to prevent initial bundle bloat.
+
+### 3. The Eco-Meme Vault (Cognitive Sustainability Education)
+*   **Meme Template Overlays:** Leverages popular environmental meme templates overlaying dynamic captions generated by Gemini:
+    *   **Bus Meme (`bus_meme.jpg`):** Compares a gloomy, ignorant carbon habit (`topCaption`) with a happy, active green outcome (`bottomCaption`).
+    *   **Beach Meme (`beach_meme.png`):** Compares a lazy excuse (`topCaption`) with personal responsibility and cleanup (`bottomCaption`).
+    *   **Soldiers Meme (`soldiers_meme.png`):** Compares a clean, functioning society (`topCaption`) with the silent everyday heroes whose micro-actions support it (`bottomCaption`).
+*   **Humor-to-Science Bridge:** Bypasses defensive psychological walls using humor, immediately pairing memes with real-world scientific consensus (e.g. albedo loops, urban heat islands, microplastics) and concrete action tips.
+
+### 4. Footprint ledger & Simulation Suite
+*   **Emissions Baseline Calculator:** Sets up a user profile during onboarding (transport, diet, grid mix, waste), calculating a custom baseline.
+*   **What-If Habit Simulator:** Slider configurations for commutes, flights, diet, shopping, and thermostat limits. Project 1-year, 5-year, and 10-year cumulative trajectories, tree offsets, and conserved arctic ice sheet square footage.
+*   **Social Cost of Carbon (SCC):** Calculates the actual economic damage avoided (severe crop failures, public health, storm cleanups) at a rate of **$0.19 per kg CO₂e** (derived from US EPA $190/ton guidelines).
+
+---
+
+## 📈 Scientific Math & Emission Parameters
+
+Our calculation multipliers are compiled from the greenhouse parameters developed by the IPCC, the GHG Protocol, and Project Drawdown.
+
+| Activity Category | Action | Base Multiplier | Target Unit |
+| :--- | :--- | :---: | :---: |
+| **Transport** | Car Commute Swap | **-7.8 kg CO₂e** | per day replaced |
+| **Transport** | Flight Skipped | **-70.0 kg CO₂e** | per long-haul skipped |
+| **Food & Diet** | Beef to Vegan Swap | **-5.5 kg CO₂e** | per meal swapped |
+| **Home Utilities** | Thermostat Offset | **-28.0 kg CO₂e** | per 1°C increase / month |
+| **Shopping** | Online Retail Cut | **-3.2 kg CO₂e** | per 10% spend reduction |
+
+---
+
+## ⚙️ Setup & Configuration
+
+### 1. Requirements
+*   **Node.js:** v18.0.0 or higher
+*   **npm:** v9.0.0 or higher
+
+### 2. Environment Configuration
+Create a `.env` file in your project root by copying the template:
+```bash
+cp .env.example .env
+```
+
+Configure the following variables inside `.env`:
+```env
+# Gemini API credentials
+GEMINI_API_KEY="AI_Studio_API_Key_Here"
+
+# Server Port and URL configuration
+PORT=3000
+APP_URL="http://localhost:3000"
+
+# MongoDB Database configuration (Leave blank to use local JSON file fallback)
+MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/db_name?retryWrites=true&w=majority"
+```
+
+### 3. Installation
+Install project dependencies:
+```bash
+npm install
+```
+
+### 4. Run Development Server
+Launches the combined Express API backend and Vite frontend server:
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 5. Build for Production
+Creates compiled assets and bundles the backend Express process:
+```bash
+npm run build
+```
+
+### 6. Run Production Server
+Starts the compiled Node process serving the bundled `/dist` assets:
+```bash
+npm run start
+```
+
+---
+
+## ☁️ Render Deployment Guide
+
+Render is the recommended hosting platform because it natively supports persistent web processes (Express/Node.js) and serves static compiled frontend assets in the same service.
+
+1.  Sign in to your [Render Dashboard](https://render.com/).
+2.  Click **New +** -> **Web Service**.
+3.  Connect your GitHub repository.
+4.  Apply the following configuration parameters:
+    *   **Runtime:** `Node`
+    *   **Build Command:** `npm install && npm run build`
+    *   **Start Command:** `npm run start`
+5.  In the **Environment** section, add your environment variables:
+    *   `GEMINI_API_KEY`: *(Your key from Google AI Studio)*
+    *   `MONGODB_URI`: *(Your MongoDB connection string, or leave empty for local file storage fallback)*
+    *   `NODE_ENV`: `production`
+6.  Click **Deploy Web Service**. Render will build and serve your app.
