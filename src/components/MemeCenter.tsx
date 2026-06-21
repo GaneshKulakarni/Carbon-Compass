@@ -219,10 +219,10 @@ export const MemeCenter: React.FC = () => {
         return (
           <div className="relative w-full aspect-square overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xl bg-stone-100 dark:bg-stone-900">
             <img src={busMemeImg} alt="Bus Meme" className="w-full h-full object-cover" />
-            <div className="absolute top-[18%] left-[6%] w-[40%] bg-black/95 text-white px-2.5 py-2 rounded-xl text-center font-extrabold uppercase text-[9px] sm:text-xs leading-tight flex items-center justify-center min-h-[50px] border border-stone-850 shadow-lg select-none">
+            <div className="absolute top-[18%] left-[6%] w-[40%] bg-white/95 dark:bg-black/95 text-stone-900 dark:text-white px-2.5 py-2 rounded-xl text-center font-extrabold uppercase text-[9px] sm:text-xs leading-tight flex items-center justify-center min-h-[50px] border border-stone-200 dark:border-stone-850 shadow-lg select-none">
               {meme.topCaption}
             </div>
-            <div className="absolute top-[18%] right-[6%] w-[40%] bg-black/95 text-white px-2.5 py-2 rounded-xl text-center font-extrabold uppercase text-[9px] sm:text-xs leading-tight flex items-center justify-center min-h-[50px] border border-stone-850 shadow-lg select-none">
+            <div className="absolute top-[18%] right-[6%] w-[40%] bg-white/95 dark:bg-black/95 text-stone-900 dark:text-white px-2.5 py-2 rounded-xl text-center font-extrabold uppercase text-[9px] sm:text-xs leading-tight flex items-center justify-center min-h-[50px] border border-stone-200 dark:border-stone-850 shadow-lg select-none">
               {meme.bottomCaption}
             </div>
           </div>
@@ -232,10 +232,10 @@ export const MemeCenter: React.FC = () => {
         return (
           <div className="relative w-full aspect-square overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xl bg-stone-100 dark:bg-stone-900">
             <img src={beachMemeImg} alt="Beach Meme" className="w-full h-full object-cover" />
-            <div className="absolute top-[5%] left-1/2 -translate-x-1/2 w-[85%] bg-black/95 text-white px-3 py-2.5 rounded-xl text-center font-extrabold uppercase text-[9px] sm:text-xs leading-tight flex items-center justify-center min-h-[45px] border border-stone-850 shadow-lg select-none">
+            <div className="absolute top-[5%] left-1/2 -translate-x-1/2 w-[85%] bg-white/95 dark:bg-black/95 text-stone-900 dark:text-white px-3 py-2.5 rounded-xl text-center font-extrabold uppercase text-[9px] sm:text-xs leading-tight flex items-center justify-center min-h-[45px] border border-stone-200 dark:border-stone-850 shadow-lg select-none">
               {meme.topCaption}
             </div>
-            <div className="absolute top-[55%] left-1/2 -translate-x-1/2 w-[85%] bg-black/95 text-white px-3 py-2.5 rounded-xl text-center font-extrabold uppercase text-[9px] sm:text-xs leading-tight flex items-center justify-center min-h-[45px] border border-stone-850 shadow-lg select-none">
+            <div className="absolute top-[55%] left-1/2 -translate-x-1/2 w-[85%] bg-white/95 dark:bg-black/95 text-stone-900 dark:text-white px-3 py-2.5 rounded-xl text-center font-extrabold uppercase text-[9px] sm:text-xs leading-tight flex items-center justify-center min-h-[45px] border border-stone-200 dark:border-stone-850 shadow-lg select-none">
               {meme.bottomCaption}
             </div>
           </div>
@@ -245,10 +245,10 @@ export const MemeCenter: React.FC = () => {
         return (
           <div className="relative w-full aspect-square overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xl bg-stone-100 dark:bg-stone-900">
             <img src={soldiersMemeImg} alt="Soldiers Meme" className="w-full h-full object-cover" />
-            <div className="absolute top-[18%] left-1/2 -translate-x-1/2 w-[75%] bg-black/95 text-white px-3 py-2 rounded-xl text-center font-extrabold uppercase text-[9px] sm:text-xs leading-tight flex items-center justify-center min-h-[35px] border border-stone-850 shadow-lg select-none">
+            <div className="absolute top-[18%] left-1/2 -translate-x-1/2 w-[75%] bg-white/95 dark:bg-black/95 text-stone-900 dark:text-white px-3 py-2 rounded-xl text-center font-extrabold uppercase text-[9px] sm:text-xs leading-tight flex items-center justify-center min-h-[35px] border border-stone-200 dark:border-stone-850 shadow-lg select-none">
               {meme.topCaption}
             </div>
-            <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 w-[90%] bg-black/95 text-white px-3 py-2 rounded-xl text-center font-extrabold uppercase text-[8px] sm:text-[11px] leading-tight flex items-center justify-center min-h-[50px] border border-stone-850 shadow-lg select-none">
+            <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 w-[90%] bg-white/95 dark:bg-black/95 text-stone-900 dark:text-white px-3 py-2 rounded-xl text-center font-extrabold uppercase text-[8px] sm:text-[11px] leading-tight flex items-center justify-center min-h-[50px] border border-stone-200 dark:border-stone-850 shadow-lg select-none">
               {meme.bottomCaption}
             </div>
           </div>
@@ -256,7 +256,7 @@ export const MemeCenter: React.FC = () => {
 
       case 'two-panel':
         return (
-          <div className="relative w-full aspect-square overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xl bg-stone-100 dark:bg-stone-955 flex font-sans select-none">
+          <div className="relative w-full aspect-square overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xl bg-stone-100 dark:bg-stone-950 flex font-sans select-none">
             {/* Split screen panels in CSS */}
             <div className="w-1/2 h-full relative overflow-hidden border-r border-stone-200 dark:border-stone-850">
               <img 
@@ -264,7 +264,7 @@ export const MemeCenter: React.FC = () => {
                 alt="Green Park" 
                 className="w-full h-full object-cover opacity-85" 
               />
-              <div className="absolute top-[8%] inset-x-2 bg-black/90 text-white p-2 rounded-lg text-center font-black uppercase text-[8px] sm:text-[11px] leading-tight min-h-[45px] flex items-center justify-center border border-stone-800">
+              <div className="absolute top-[8%] inset-x-2 bg-white/90 dark:bg-black/90 text-stone-900 dark:text-white p-2 rounded-lg text-center font-black uppercase text-[8px] sm:text-[11px] leading-tight min-h-[45px] flex items-center justify-center border border-stone-200 dark:border-stone-800">
                 {meme.panelLeftText || meme.topCaption}
               </div>
             </div>
@@ -274,7 +274,7 @@ export const MemeCenter: React.FC = () => {
                 alt="Dry Ground" 
                 className="w-full h-full object-cover opacity-80" 
               />
-              <div className="absolute top-[8%] inset-x-2 bg-black/90 text-white p-2 rounded-lg text-center font-black uppercase text-[8px] sm:text-[11px] leading-tight min-h-[45px] flex items-center justify-center border border-stone-800">
+              <div className="absolute top-[8%] inset-x-2 bg-white/90 dark:bg-black/90 text-stone-900 dark:text-white p-2 rounded-lg text-center font-black uppercase text-[8px] sm:text-[11px] leading-tight min-h-[45px] flex items-center justify-center border border-stone-200 dark:border-stone-800">
                 {meme.panelRightText || meme.bottomCaption}
               </div>
             </div>
@@ -284,7 +284,7 @@ export const MemeCenter: React.FC = () => {
       case 'classic':
       default:
         return (
-          <div className="relative w-full aspect-square overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xl bg-stone-100 dark:bg-stone-955 flex flex-col justify-between p-4">
+          <div className="relative w-full aspect-square overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xl bg-stone-100 dark:bg-stone-950 flex flex-col justify-between p-4">
             <img src={meme.imageUrl} alt={meme.title} className="absolute inset-0 w-full h-full object-cover opacity-75" />
             <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-transparent to-black/85 z-0" />
             
@@ -395,7 +395,7 @@ export const MemeCenter: React.FC = () => {
                     alt={featuredMeme.title} 
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out" 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/80 via-transparent to-transparent z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-white/95 dark:from-black/80 via-transparent to-transparent z-10" />
                 </div>
                 
                 {/* Description panel */}
@@ -477,7 +477,7 @@ export const MemeCenter: React.FC = () => {
             </div>
           ) : (
             /* Empty placeholder card (like the empty box on the right of the mockup) */
-            <div className="rounded-3xl border border-dashed border-stone-300 dark:border-stone-850 p-12 text-center text-stone-550 dark:text-stone-400 text-xs">
+            <div className="rounded-3xl border border-dashed border-stone-300 dark:border-stone-850 p-12 text-center text-stone-500 dark:text-stone-400 text-xs">
               No vaults found matching this filter. Tap "GENERATE NEW" to create one!
             </div>
           )}
@@ -541,7 +541,7 @@ export const MemeCenter: React.FC = () => {
 
                 {/* Scientific consensus fact detail */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-550 dark:text-stone-400 flex items-center gap-1.5">
+                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-500 dark:text-stone-400 flex items-center gap-1.5">
                     <Flame className="h-4 w-4 text-orange-500 animate-pulse" />
                     <span>The Real Climate Physics</span>
                   </label>
